@@ -1,0 +1,7 @@
+.idea
+launch
+RoleManager/bin
+RoleManager/obj
+RoleManager/Properties/launchSettings.json
+docker-compose.yml
+dockerfile
