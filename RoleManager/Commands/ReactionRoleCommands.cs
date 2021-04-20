@@ -78,6 +78,40 @@ namespace RoleManager.Commands
             var rr = await result;
             if (rr.IsFailure()) return false;
             var rrModel = rr.Get();
+            return await ManageRR(rrModel, "created Reaction Role");
+        }
+
+
+        [Command("updateRR", RunMode = RunMode.Async)]
+        public async Task UpdateRRCommand(string name)
+        {
+            if (!await UpdateRR(name))
+            {
+                await SendChannelMessage("> **Timeout or an Error occured and the reaction role was unable to be created.**");
+            }
+        }
+        private async Task<bool> UpdateRR(string name)
+        {
+            var modelResult = await CheckStaffAndRetrieveModel();
+            if (modelResult.IsFailure()) return false;
+            
+            _logging.Info($"{Context.User.Username}#{Context.User.Discriminator} in Guild {Context.Guild.Name}({Context.Guild.Id}) calling Update RR...");
+            await SendChannelMessage(
+                $"**Setting up reaction role...** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
+            var rr = await _rrRepo.GetReactionRole(Context.Guild.Id, name);
+            if (rr.IsFailure())
+            {
+                await SendChannelMessage($"> Unable to find Reaction Role with name {name}!");
+                return false;
+            }
+            var rrModel = rr.Get();
+            await SendChannelMessage($"> Loading current config for reference...");
+            await SendChannelMessage(embed: CreateReactionRoleRuleEmbed(rrModel));
+            return await ManageRR(rrModel, "updated Reaction Role");
+        }
+
+        private async Task<bool> ManageRR(ReactionRoleModel rrModel, string eventType)
+        {
             List<IEmote> emotes = new();
             while (true)
             {
@@ -110,15 +144,17 @@ namespace RoleManager.Commands
             rrModel = rrModel with {MessageId = msg.Id};
             
             _logging.Info("Sent Message!");
-
+            await msg.RemoveAllReactionsAsync();
             await msg.AddReactionsAsync(emotes.ToArray());
             _rrService.UpsertReactionMessage(rrModel);
             await _rrRepo.AddOrUpdateReactionRole(rrModel);
 
-            _logging.Info("Successfully completed RR setup!");
+            _logging.Info($"Successfully {eventType}!");
             await SendChannelMessage(
-                $"> **Sucessfully completed Reaction Role setup!**");
+                $"> **Successfully {eventType}!**");
+            await SendChannelMessage(embed: CreateReactionRoleRuleEmbed(rrModel));
             return true;
         }
+
     }
 }

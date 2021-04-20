@@ -16,9 +16,21 @@ namespace RoleManager.Model
         }
     }
 
-    public record RoleUpdateModel(ulong User, RoleManageModel RolesChanged);
+    public record RoleUpdateModel(ulong User, RoleManageModel RolesChanged)
+    {
+        public RoleEventStorageModel ToStorage(Guid storageKey)
+        {
+            return new RoleEventStorageModel(storageKey, User, RolesChanged);
+        }
+    }
 
-    public record RoleEventStorageModel(Guid StorageKey, ulong User, RoleManageModel RolesChanged);
+    public record RoleEventStorageModel(Guid StorageKey, ulong User, RoleManageModel RolesChanged)
+    {
+        public RoleUpdateModel ToModel()
+        {
+            return new RoleUpdateModel(User, RolesChanged);
+        }
+    }
 
     public record RoleUpdateEvent(IGuildUser User, RoleManageDomain RolesChanged)
     {

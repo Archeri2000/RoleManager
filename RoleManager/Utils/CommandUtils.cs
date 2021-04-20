@@ -55,6 +55,48 @@ namespace RoleManager.Utils
                 .WithCurrentTimestamp()
                 .Build();
         }
+        
+        public static Embed CreateReactionRoleRuleEmbed(ReactionRoleModel model)
+        {
+            var builder = new EmbedBuilder()
+                .WithTitle($"Reaction Role: {model.Name}")
+                .AddField("Channel", MentionUtils.MentionChannel(model.ChannelId))
+                .WithColor(116, 223, 207)
+                .WithCurrentTimestamp();
+            if (model.Rule is ReactionRuleModel rule)
+            {
+                foreach (var (emote, roles) in rule.Reactions)
+                {
+                    builder.AddRule(emote, roles);
+                }
+            }
+            else
+            {
+                builder.AddField("Reaction", (model.Rule as ReverseRuleModel).Emote);
+            }
+
+            return builder.Build();
+        }
+        
+        public static EmbedBuilder AddRule(this EmbedBuilder builder, string emote, RoleManageModel model)
+        {
+            return builder
+                .AddField("Reaction", emote)
+                .AddField("Roles To Add", model.ToAdd.GetRoleMentions())
+                .AddField("Roles To Remove", model.ToRemove.GetRoleMentions());
+        }
+        
+        public static Embed CreateJailCommandEmbed(this JailConfigModel model)
+        {
+            return new EmbedBuilder()
+                .WithTitle("Jail Command Config")
+                .AddField("Is Logged", model.ShouldLog?"True":"False")
+                .AddField("Roles To Add", model.Roles.ToAdd.GetRoleMentions())
+                .AddField("Roles To Remove", model.Roles.ToRemove.GetRoleMentions())
+                .WithColor(116, 223, 207)
+                .WithCurrentTimestamp()
+                .Build();
+        }
 
         public static ReactionRoleModel WithEmoteLinked(this ReactionRoleModel model, string emote)
         {
