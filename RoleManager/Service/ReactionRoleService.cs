@@ -8,11 +8,12 @@ using Discord;
 using Discord.WebSocket;
 using RoleManager.Model;
 using RoleManager.Repository;
-using static RoleManager.ReactionRoleUtils;
+using RoleManager.Utils;
+using static RoleManager.Utils.ReactionRoleUtils;
 
 namespace RoleManager.Service
 {
-    public class ReactionRoleService
+    public partial class ReactionRoleService
     {
         private const string SERVICE_NAME = "ReactRole";
         private readonly IRoleEventStorageRepository _eventStorage;
@@ -49,18 +50,6 @@ namespace RoleManager.Service
                 .ToList();
         }
 
-        public static async Task<ReactionRoleService> InitReactionRoleService(IReactionRoleRuleRepository repo,
-            IRoleEventStorageRepository eventStorage, 
-            IDiscordLogMessageService logMessageService,
-            DiscordSocketClient client,
-            ILoggingService logging)
-        {
-            var svc = new ReactionRoleService(eventStorage, logMessageService, client, logging);
-            var failed = await svc.InitialiseReactionRoles(repo);
-            failed.ForEach(x => svc._logging.Error($"Failed to initialise {x.Name} from server {x.GuildId}!"));
-            return svc;
-        }
-
         public async Task OnReaction(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel,
             SocketReaction reaction)
         {
@@ -94,7 +83,7 @@ namespace RoleManager.Service
                 {
                     var (update, _) = x;
                     _logging.Info($"Successfully added [{update.RolesChanged.ToAdd.Stringify()}] " +
-                                         $"and removed [{update.RolesChanged.ToRemove.Stringify()}] on {update.User.Username + update.User.DiscriminatorValue}!");
+                                         $"and removed [{update.RolesChanged.ToRemove.Stringify()}] on { update.User.Username + update.User.DiscriminatorValue}!");
                 },
                 Failure: x =>
                 {
@@ -109,7 +98,7 @@ namespace RoleManager.Service
             return (model, UpsertReactionMessage(model.GuildId, model.ChannelId, model.MessageId, model.Rule));
         }
 
-        private bool UpsertReactionMessage(ulong guildId, ulong channelId, ulong messageId, IReactionRoleModel rule)
+        private bool UpsertReactionMessage(ulong guildId, ulong channelId, ulong messageId, IReactionRuleModel rule)
         {
             if (!_reactionGuilds.TryGetValue(guildId, out var guild))
             {
@@ -120,153 +109,6 @@ namespace RoleManager.Service
             return guild.UpsertReactionMessage(channelId, messageId, rule);
         }
 
-        private Result<GuildReactionRole> TryGetGuild(ulong guildId)
-        {
-            if (_reactionGuilds.TryGetValue(guildId, out var guild))
-            {
-                return guild;
-            }
-
-            return new KeyNotFoundException($"Guild {guildId} does not have a Reaction Role!");
-
-        }
-
-        private async Task<Result<Unit>> PersistIfConfigured((RoleUpdateEvent updateEvent, ReactionRoleConfig config) x)
-        {
-            var (updateEvent, config) = x;
-            if (!config.ShouldStoreData)
-            {
-                return new Unit();
-            }
-
-            return await _eventStorage.Store(config.StorageKey, updateEvent);
-        }
-
-        private Func<(RoleUpdateEvent updateEvent, ReactionRoleConfig config),Task<Result<Unit>>> RemoveReactionIfConfigured(SocketReaction reaction, Cacheable<IUserMessage, ulong> backupMessage)
-        {
-            return async (x) =>
-            {
-                var (updateEvent, config) = x;
-                _logging.Verbose($"Checking RemoveReaction: {config.ShouldRemoveReaction}");
-                if (!config.ShouldRemoveReaction)
-                {
-                    return new Unit();
-                }
-                IUserMessage message;
-                if (reaction.Message.IsSpecified)
-                {
-                    message = reaction.Message.Value;
-                }
-                else
-                {
-                    message = await Task.Run(backupMessage.GetOrDownloadAsync);
-                }
-
-                if (message is null)
-                {
-                    _logging.Error("Message is unspecified!");
-                    return new Unit();
-                }
-
-                await message.RemoveReactionAsync(reaction.Emote, updateEvent.User.Id);
-                return new Unit();
-            };
-        }
-
-        private Func<(RoleUpdateEvent updateEvent, ReactionRoleConfig config), Task<Result<Unit>>> EmitLogMessageIfConfigured(IGuild guild)
-        {
-            return async x =>
-            {
-                var embedMessage = CreateReactionRoleEmbedLog(x.updateEvent, x.config);
-                _logMessageService.WriteLogToGuild(guild, embedMessage);
-                return new Unit();
-            };
-        }
-
-        private Func<ReverseRuleModel, Result<ReactionRoleConfig>> IsCorrectReverseReaction(string emote)
-        {
-            return x => (emote == x.Emote)
-                ? x.Config
-                : new Exception("Reverse Reaction did not match emote!");
-        }
-
-        private Func<ReactionRoleConfig, Task<Result<(RoleManageDomain toUpdate, ReactionRoleConfig config)>>>
-            GetRolesToRestore(IUser user, IGuild guild)
-        {
-            return async x =>
-            {
-                var updateEvent = await _eventStorage.Load(x.StorageKey, user.Id);
-                if (updateEvent.IsFailure())
-                {
-                    await _logMessageService.TryAlertStaff(guild, $"User {MentionUtils.MentionUser(user.Id)} reacted to reaction role: {x.Name}, but it failed!");
-                }
-                return updateEvent.Then(evt => (new RoleManageDomain(evt.RolesChanged.ToRemove, evt.RolesChanged.ToAdd), x).ToResult());
-            };
-        }
-    }
-
-    public class GuildReactionRole
-    {
-        private ConcurrentDictionary<ulong, ChannelReactionRole> _reactionChannels;
-        
-        public GuildReactionRole(ConcurrentDictionary<ulong, ChannelReactionRole> reactionChannels)
-        {
-            _reactionChannels = reactionChannels;
-        }
-
-        public GuildReactionRole()
-        {
-            _reactionChannels = new();
-        }
-
-        public bool UpsertReactionMessage(ulong channelId, ulong messageId, IReactionRoleModel rule)
-        {
-            if (!_reactionChannels.TryGetValue(channelId, out var channel))
-            {
-                channel = new ChannelReactionRole();
-                _reactionChannels.TryAdd(channelId, channel);
-            }
-            return channel.UpsertReactionMessage(messageId, rule);
-        }
-
-        public Result<ChannelReactionRole> TryGetChannel(ulong channelId)
-        {
-            if (_reactionChannels.TryGetValue(channelId, out var channel))
-            {
-                return channel;
-            }
-
-            return new KeyNotFoundException($"Channel {channelId} does not have a Reaction Role!");
-        }
-    }
-
-    public class ChannelReactionRole
-    {
-        private ConcurrentDictionary<ulong, IReactionRoleModel> _reactionMessages;
-
-        public ChannelReactionRole()
-        {
-            _reactionMessages = new();
-        }
-        public ChannelReactionRole(ConcurrentDictionary<ulong, IReactionRoleModel> reactionMessages)
-        {
-            _reactionMessages = reactionMessages;
-        }
-
-        public bool UpsertReactionMessage(ulong messageId, IReactionRoleModel rule)
-        {
-            _reactionMessages[messageId] = rule;
-            return true;        
-        }
-        
-        public Result<IReactionRoleModel> TryGetMessage(ulong messageId)
-        {
-            if (_reactionMessages.TryGetValue(messageId, out var rule))
-            {
-                return rule.ToResult();
-            }
-
-            return new KeyNotFoundException($"Message {messageId} does not have a Reaction Role!");
-        }
+       
     }
 }

@@ -6,7 +6,7 @@ namespace RoleManager.Model
         public ulong GuildId { get; init; }
         public ulong ChannelId { get; init; }
         public ulong MessageId { get; init; }
-        public IReactionRoleModel Rule { get; init; }
+        public IReactionRuleModel Rule { get; init; }
         
     }
 }

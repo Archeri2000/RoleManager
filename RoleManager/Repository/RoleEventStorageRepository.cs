@@ -8,22 +8,22 @@ namespace RoleManager.Repository
 {
     public class RoleEventStorageRepository : IRoleEventStorageRepository
     {
-        private Dictionary<Guid, Dictionary<ulong, RoleUpdateEvent>> _storage = new();
-        public async Task<Result<Unit>> Store(Guid storageKey, RoleUpdateEvent updateEvent)
+        private Dictionary<Guid, Dictionary<ulong, RoleUpdateModel>> _storage = new();
+        public async Task<Result<Unit>> Store(Guid storageKey, RoleUpdateModel updateModel)
         {
-            _storage.TryAdd(storageKey, new Dictionary<ulong, RoleUpdateEvent>());
-            _storage[storageKey][updateEvent.User.Id] = updateEvent;
+            _storage.TryAdd(storageKey, new Dictionary<ulong, RoleUpdateModel>());
+            _storage[storageKey][updateModel.User] = updateModel;
             return new Unit();
         }
 
-        public async Task<Result<RoleUpdateEvent>> Load(Guid storageKey, ulong userId)
+        public async Task<Result<RoleUpdateModel>> Load(Guid storageKey, ulong userId)
         {
-            RoleUpdateEvent updateEvent = null;
-            if (!_storage.TryGetValue(storageKey, out var dict) || !dict.TryGetValue(userId, out updateEvent))
+            RoleUpdateModel updateModel = null;
+            if (!_storage.TryGetValue(storageKey, out var dict) || !dict.TryGetValue(userId, out updateModel))
             {
                 return new KeyNotFoundException("Model not found in repository!");
             }
-            return updateEvent;
+            return updateModel;
         }
     }
 }

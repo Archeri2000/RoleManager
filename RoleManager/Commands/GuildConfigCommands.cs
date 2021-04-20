@@ -11,7 +11,8 @@ using Interactivity;
 using RoleManager.Model;
 using RoleManager.Repository;
 using RoleManager.Service;
-using static RoleManager.CommandExtensions;
+using RoleManager.Utils;
+using static RoleManager.Utils.CommandUtils;
 
 namespace RoleManager.Commands
 {

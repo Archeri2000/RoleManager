@@ -6,8 +6,7 @@ using CSharp_Result;
 
 namespace RoleManager.Model
 {
-    public record ReactionRoleConfig(bool ShouldRemoveReaction, bool ShouldLogResult, bool ShouldStoreData, Guid StorageKey, string Name);
-    public record ReactionRuleModel:IReactionRoleModel
+    public record ReactionRuleModel:IReactionRuleModel
     {
         public ImmutableDictionary<string, RoleManageModel> Reactions
         {
@@ -35,12 +34,12 @@ namespace RoleManager.Model
         public ReactionRoleConfig Config { get; init; }
     }
 
-    public interface IReactionRoleModel
+    public interface IReactionRuleModel
     {
         public ReactionRoleConfig Config { get; init; }
     }
 
-    public record ReverseRuleModel : IReactionRoleModel
+    public record ReverseRuleModel : IReactionRuleModel
     {
         public ReactionRoleConfig Config { get; init; }
         public string Emote { get; init; }
@@ -50,4 +49,7 @@ namespace RoleManager.Model
             return this with {Emote = emote};
         }
     }
+    
+    public record ReactionRoleConfig(bool ShouldRemoveReaction, bool ShouldLogResult, bool ShouldStoreData, Guid StorageKey, string Name);
+
 }
