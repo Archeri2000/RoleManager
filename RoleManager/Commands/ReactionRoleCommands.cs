@@ -144,7 +144,7 @@ namespace RoleManager.Commands
             rrModel = rrModel with {MessageId = msg.Id};
             
             _logging.Info("Sent Message!");
-            await msg.RemoveAllReactionsAsync();
+            //await msg.RemoveAllReactionsAsync();
             await msg.AddReactionsAsync(emotes.ToArray());
             _rrService.UpsertReactionMessage(rrModel);
             await _rrRepo.AddOrUpdateReactionRole(rrModel);

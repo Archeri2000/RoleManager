@@ -21,9 +21,9 @@ namespace RoleManager.Commands
         private readonly SourcedLoggingService _logging;
         private readonly DiscordSocketRestClient _client;
 
-        public JailConfigCommands(DiscordSocketRestClient client, ILoggingService logging, IJailSettingsRepository jailSettings, IGuildConfigRepository repo, InteractivityService interactivity)
+        public JailConfigCommands(DiscordSocketClient client, ILoggingService logging, IJailSettingsRepository jailSettings, IGuildConfigRepository repo, InteractivityService interactivity)
         {
-            _client = client;
+            _client = client.Rest;
             _jailSettings = jailSettings;
             _repo = repo;
             _interactivity = interactivity;
@@ -47,7 +47,7 @@ namespace RoleManager.Commands
             _logging.Info(
                 $"{Context.User.Username}#{Context.User.Discriminator} in Guild {Context.Guild.Name}({Context.Guild.Id}) calling Setup Jail...");
             await SendChannelMessage(
-                $"**Setting up jail...** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
+                $"**Setting up jail config...** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
             var task =
                 from shouldLog in GetShouldJailBeLogged()
                 from rolesChanged in GetJailRoles()
