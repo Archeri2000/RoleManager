@@ -1,14 +1,45 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CSharp_Result;
+using RoleManager.Database;
 using RoleManager.Model;
 
 namespace RoleManager.Repository
 {
     public class RoleEventStorageRepository : IRoleEventStorageRepository
     {
-        private Dictionary<Guid, Dictionary<ulong, RoleUpdateModel>> _storage = new();
+        private readonly CoreDbContext _context;
+
+        public RoleEventStorageRepository(CoreDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<Result<RoleUpdateModel>> Load(Guid storageKey, ulong userId)
+        {
+            var result = await _context.Events.FirstOrDefaultAsync(x => x.User == userId && x.StorageKey == storageKey);
+            if (result == null)
+            {
+                return new KeyNotFoundException();
+            }
+            return result.ToModel();
+        }
+        
+        
+        public async Task<Result<Unit>> Store(Guid storageKey, RoleUpdateModel updateModel)
+        {
+            var storageEvent = updateModel.ToStorage(storageKey);
+            _context.Events.Update(storageEvent);
+            await _context.SaveChangesAsync();
+            return new Unit();
+        }
+    }
+    
+    public class MockRoleEventStorageRepository : IRoleEventStorageRepository
+    {
+        private readonly Dictionary<Guid, Dictionary<ulong, RoleUpdateModel>> _storage = new();
         public async Task<Result<Unit>> Store(Guid storageKey, RoleUpdateModel updateModel)
         {
             _storage.TryAdd(storageKey, new Dictionary<ulong, RoleUpdateModel>());
