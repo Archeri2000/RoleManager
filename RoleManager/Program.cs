@@ -8,14 +8,29 @@ using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using RoleManager;
 using RoleManager.Model;
 using RoleManager.Repository;
 using RoleManager.Service;
 
 // Top Level program
-//TODO: Connection String
-var services = new Setup(Environment.GetEnvironmentVariable("DATABASE_URL")).BuildServiceProvider();
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+var databaseUri = new Uri(databaseUrl);
+var userInfo = databaseUri.UserInfo.Split(':');
+
+var builder = new NpgsqlConnectionStringBuilder
+{
+    Host = databaseUri.Host,
+    Port = databaseUri.Port,
+    Username = userInfo[0],
+    Password = userInfo[1],
+    Database = databaseUri.LocalPath.TrimStart('/'),
+    SslMode = SslMode.Require,
+    TrustServerCertificate = true
+};
+
+var services = new Setup(builder.ToString()).BuildServiceProvider();
 new Program(services).MainAsync().GetAwaiter().GetResult();
 
 namespace RoleManager
