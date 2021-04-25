@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using RoleManager;
+using RoleManager.Database;
 using RoleManager.Model;
 using RoleManager.Repository;
 using RoleManager.Service;
@@ -45,6 +46,8 @@ namespace RoleManager
         {
             _client = serviceProvider.GetService<DiscordSocketClient>();
             _logger = new SourcedLoggingService(serviceProvider.GetService<ILoggingService>(),"Main");
+            var dbhosted = new DbMigratorHostedService(serviceProvider, serviceProvider.GetService<ILoggingService>());
+            dbhosted.StartAsync(new CancellationToken()).RunSynchronously();
             var reactionRole = serviceProvider.GetService<ReactionRoleService>();
             serviceProvider.GetService<CommandHandler>().InstallCommandsAsync(serviceProvider);
             reactionRole.InitialiseReactionRoles(serviceProvider.GetService<IReactionRoleRuleRepository>());
