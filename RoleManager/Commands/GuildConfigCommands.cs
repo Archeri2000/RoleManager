@@ -37,6 +37,7 @@ namespace RoleManager.Commands
         [Command("setup", RunMode = RunMode.Async)]
         public async Task SetupGuildConfig()
         {
+            _logging.Info("Setup Guild Config Called");
             var modelResult = await CheckStaffAndRetrieveModel();
             if (modelResult.IsFailure()) return;
             var model = modelResult.Get();
