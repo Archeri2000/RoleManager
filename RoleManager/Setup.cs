@@ -30,10 +30,10 @@ namespace RoleManager
  	public IServiceProvider BuildServiceProvider() => new ServiceCollection()
  		.AddSingleton(_client)
  		.AddSingleton(_commands)
- 		// You can pass in an instance of the desired type
+        .AddSingleton<ILoggingService, LoggingService>()
+        // You can pass in an instance of the desired type
         .AddDbContext<CoreDbContext>(options => options.UseNpgsql(_connectionString))
         .AddHostedService<DbMigratorHostedService>()
-        .AddSingleton<ILoggingService, LoggingService>()
         .AddSingleton<IGuildConfigRepository, GuildConfigRepository>()
  		.AddSingleton<IReactionRoleRuleRepository, ReactionRoleRuleRepository>()
         .AddSingleton<IRoleEventStorageRepository, RoleEventStorageRepository>()
