@@ -22,7 +22,18 @@ namespace RoleManager.Repository
         {
             Console.WriteLine("Function Called");
             Console.WriteLine("guild configs" + _context.GuildConfigModels);
-            var result = await (_context.GuildConfigModels as IQueryable<GuildConfigModel>).FirstOrDefaultAsync(x => x.GuildId == guildId);
+            GuildConfigModel result = null;
+            try
+            {
+                result =
+                    await (_context.GuildConfigModels as IQueryable<GuildConfigModel>).FirstOrDefaultAsync(x =>
+                        x.GuildId == guildId);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
             Console.WriteLine("Result obtained");
             if (result == null)
             {
