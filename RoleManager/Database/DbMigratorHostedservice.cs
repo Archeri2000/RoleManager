@@ -11,14 +11,14 @@ namespace RoleManager.Database
     public class DbMigratorHostedService : IHostedService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IHostApplicationLifetime _lifetime;
+        //private readonly IHostApplicationLifetime _lifetime;
         private readonly SourcedLoggingService _logging;
 
         public DbMigratorHostedService(IServiceProvider serviceProvider,
-            IHostApplicationLifetime lifetime, ILoggingService logger)
+            ILoggingService logger)
         {
             _serviceProvider = serviceProvider;
-            _lifetime = lifetime;
+            //_lifetime = lifetime;
             _logging = new SourcedLoggingService(logger, "dbmigrator");
         }
 
@@ -38,7 +38,7 @@ namespace RoleManager.Database
                     {
                         _logging.Fatal("Failed to contact DB, exiting application");
                         Environment.ExitCode = 1;
-                        _lifetime.StopApplication();
+                        //_lifetime.StopApplication();
                         break;
                     }
 
@@ -65,7 +65,7 @@ namespace RoleManager.Database
                 _logging.Fatal($"Database migration failed: {e.Message}");
                 _logging.Fatal(e.StackTrace);
                 Environment.ExitCode = 1;
-                _lifetime.StopApplication();
+                //_lifetime.StopApplication();
             }
         }
 
