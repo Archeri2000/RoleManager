@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +20,10 @@ namespace RoleManager.Repository
 
         public async Task<Result<GuildConfigModel>> GetGuildConfig(ulong guildId)
         {
+            Console.WriteLine("Function Called");
+            Console.WriteLine("guild configs" + _context.GuildConfigModels);
             var result = await (_context.GuildConfigModels as IQueryable<GuildConfigModel>).FirstOrDefaultAsync(x => x.GuildId == guildId);
+            Console.WriteLine("Result obtained");
             if (result == null)
             {
                 return new KeyNotFoundException("Unable to find guild config!");
