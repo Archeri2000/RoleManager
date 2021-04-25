@@ -40,6 +40,8 @@ namespace RoleManager.Repository
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                Console.WriteLine(e.InnerException.Message);
+                throw e;
             }
 
             return conf.GuildId;
