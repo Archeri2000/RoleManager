@@ -37,7 +37,6 @@ namespace RoleManager.Commands
         [Command("setup", RunMode = RunMode.Async)]
         public async Task SetupGuildConfig()
         {
-            _logging.Info("Setup Guild Config Called");
             var modelResult = await CheckStaffAndRetrieveModel();
             if (modelResult.IsFailure()) return;
             var model = modelResult.Get();
@@ -151,15 +150,11 @@ namespace RoleManager.Commands
         private async Task<Result<GuildConfigModel>> CheckStaffAndRetrieveModel()
         {
             var userRes = await _client.GetGuildUser(Context.Guild.Id, Context.User.Id);
-            _logging.Verbose("Retrieved User");
             if (userRes.IsFailure()) return new KeyNotFoundException();
-            _logging.Verbose("User found");
             var user = userRes.Get();
             var result = await _repo.GetGuildConfig(Context.Guild.Id);
             var model = result.GetModelOrDefault(Context.Guild);
-            _logging.Verbose("Get guild config");
             if (!user.IsStaff(model.StaffRoles)) return new UnauthorizedAccessException();
-            _logging.Verbose("user is authorised");
             return model;
         }
         

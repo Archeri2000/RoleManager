@@ -20,21 +20,7 @@ namespace RoleManager.Repository
 
         public async Task<Result<GuildConfigModel>> GetGuildConfig(ulong guildId)
         {
-            Console.WriteLine("Function Called");
-            Console.WriteLine("guild configs" + _context.GuildConfigModels);
-            GuildConfigModel result = null;
-            try
-            {
-                result =
-                    await (_context.GuildConfigModels as IQueryable<GuildConfigModel>).FirstOrDefaultAsync(x =>
-                        x.GuildId == guildId);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
-            Console.WriteLine("Result obtained");
+            var result = await (_context.GuildConfigModels as IQueryable<GuildConfigModel>).FirstOrDefaultAsync(x => x.GuildId == guildId);
             if (result == null)
             {
                 return new KeyNotFoundException("Unable to find guild config!");
@@ -46,8 +32,16 @@ namespace RoleManager.Repository
 
         public async Task<Result<ulong>> StoreGuildConfig(GuildConfigModel conf)
         {
-            _context.GuildConfigModels.Update(conf);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.GuildConfigModels.Update(conf);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
             return conf.GuildId;
         }
     }
