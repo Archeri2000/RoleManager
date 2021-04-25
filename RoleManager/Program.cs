@@ -47,7 +47,7 @@ namespace RoleManager
             _client = serviceProvider.GetService<DiscordSocketClient>();
             _logger = new SourcedLoggingService(serviceProvider.GetService<ILoggingService>(),"Main");
             var dbhosted = new DbMigratorHostedService(serviceProvider, serviceProvider.GetService<ILoggingService>());
-            dbhosted.StartAsync(new CancellationToken()).RunSynchronously();
+            dbhosted.StartAsync(new CancellationToken()).Wait();
             var reactionRole = serviceProvider.GetService<ReactionRoleService>();
             serviceProvider.GetService<CommandHandler>().InstallCommandsAsync(serviceProvider);
             reactionRole.InitialiseReactionRoles(serviceProvider.GetService<IReactionRoleRuleRepository>());
