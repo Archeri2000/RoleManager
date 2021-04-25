@@ -91,8 +91,24 @@ namespace RoleManager.Utils
             return new EmbedBuilder()
                 .WithTitle("Jail Command Config")
                 .AddField("Is Logged", model.ShouldLog?"True":"False")
+                .AddField("Logging Channel", model.LogChannel == 0?"-":MentionUtils.MentionChannel(model.LogChannel))
                 .AddField("Roles To Add", model.Roles.ToAdd.GetRoleMentions())
                 .AddField("Roles To Remove", model.Roles.ToRemove.GetRoleMentions())
+                .WithColor(116, 223, 207)
+                .WithCurrentTimestamp()
+                .Build();
+        }
+        
+        public static Embed CreateJailLogEmbed(string reason, JailTimeSpan duration, IUser caller, RoleUpdateEvent target)
+        {
+            return new EmbedBuilder()
+                .WithAuthor(caller)
+                .WithTitle("Jailing Log")
+                .AddField("Target", MentionUtils.MentionUser(target.User.Id))
+                .AddField("Duration", duration.ToString())
+                .AddField("Reason", reason)
+                .AddField("Roles Taken", target.RolesChanged.ToRemove.GetRoleMentions())
+                .AddField("Roles Added",target.RolesChanged.ToAdd.GetRoleMentions())
                 .WithColor(116, 223, 207)
                 .WithCurrentTimestamp()
                 .Build();

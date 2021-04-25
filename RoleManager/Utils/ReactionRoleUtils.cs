@@ -18,7 +18,7 @@ namespace RoleManager.Utils
             return guild => guild.TryGetChannel(channelId);
         }
 
-        public static Func<ChannelReactionRole, Result<IReactionRuleModel>> TryGetMessage(ulong messageId)
+        public static Func<ChannelReactionRole, Result<ReactionRuleModelBase>> TryGetMessage(ulong messageId)
         {
             return channel => channel.TryGetMessage(messageId);
         }

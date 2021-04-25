@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CSharp_Result;
+using Discord;
 using static RoleManager.Utils.CommandUtils;
 using Discord.WebSocket;
 using RoleManager.Model;
@@ -75,34 +76,54 @@ namespace RoleManager.Commands
             return new RoleManageModel(rolesToAdd.ToImmutableHashSet(), rolesToRemove.ToImmutableHashSet());
         } 
                 
-                private async Task<Result<bool>> GetShouldJailBeLogged()
+        private async Task<Result<bool>> GetShouldJailBeLogged()
+        {
+            await SendChannelMessage("**Should the jail command be logged? (y/n)**");
+            return await GetBool()
+                .DoAwait(async x =>
                 {
-                    await SendChannelMessage("**Should the jail command be logged? (y/n)**");
-                    return await GetBool()
-                        .DoAwait(async x =>
-                        {
-                            await SendChannelMessage(x?"> **Jail command will be logged.**":"> **Jail command will not be logged.**");
-                        }, Errors.MapAll);
-                }
+                    await SendChannelMessage(x?"> **Jail command will be logged.**":"> **Jail command will not be logged.**");
+                }, Errors.MapAll);
+        }
 
-                private async Task<Result<bool>> GetBool()
+        private async Task<Result<bool>> GetBool()
+        {
+            var isTrue = false;
+            var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage( message => message.Content.ToLower() is "y" or "n"),
+                async (message, b) =>
                 {
-                    var isTrue = false;
-                    var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage( message => message.Content.ToLower() is "y" or "n"),
-                        async (message, b) =>
-                        {
-                            if (message.Content.ToLower() is "y")
-                            {
-                                isTrue = true;
-                            }
-                        });
-                    if (!result.IsSuccess)
+                    if (message.Content.ToLower() is "y")
                     {
-                        _logging.Error("Setup command timed out...");
-                        return new TimeoutException();
+                        isTrue = true;
                     }
-                    return isTrue;
-                }
+                });
+            if (!result.IsSuccess)
+            {
+                _logging.Error("Setup command timed out...");
+                return new TimeoutException();
+            }
+            return isTrue;
+        }
+        
+        private async Task<Result<ulong>> GetJailLogChannel()
+        {
+            //Get Channel
+            await SendChannelMessage(
+                $"**What channel do you want to log jail events in?(or type `skip` to skip)**");
+    
+            ulong channel = 0;
+            var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(message =>
+                message.Content=="skip" || MentionUtils.TryParseChannel(message.Content, out channel)));
+            if (!result.IsSuccess)
+            {
+                _logging.Error("Setup command timed out...");
+                return new TimeoutException();
+            }
+
+            await SendChannelMessage(
+                $"> **Logging jail events in channel: {MentionUtils.MentionChannel(channel)}...**");
+            return channel;
+        }
 
         private Predicate<SocketMessage> CheckUserAndChannelForMessage() => CheckUserAndChannelForMessage(_ => true);
 

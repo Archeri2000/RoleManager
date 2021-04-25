@@ -19,7 +19,7 @@ public class GuildReactionRole
             _reactionChannels = new();
         }
 
-        public bool UpsertReactionMessage(ulong channelId, ulong messageId, IReactionRuleModel rule)
+        public bool UpsertReactionMessage(ulong channelId, ulong messageId, ReactionRuleModelBase rule)
         {
             if (!_reactionChannels.TryGetValue(channelId, out var channel))
             {
@@ -42,24 +42,24 @@ public class GuildReactionRole
 
     public class ChannelReactionRole
     {
-        private ConcurrentDictionary<ulong, IReactionRuleModel> _reactionMessages;
+        private ConcurrentDictionary<ulong, ReactionRuleModelBase> _reactionMessages;
 
         public ChannelReactionRole()
         {
             _reactionMessages = new();
         }
-        public ChannelReactionRole(ConcurrentDictionary<ulong, IReactionRuleModel> reactionMessages)
+        public ChannelReactionRole(ConcurrentDictionary<ulong, ReactionRuleModelBase> reactionMessages)
         {
             _reactionMessages = reactionMessages;
         }
 
-        public bool UpsertReactionMessage(ulong messageId, IReactionRuleModel rule)
+        public bool UpsertReactionMessage(ulong messageId, ReactionRuleModelBase rule)
         {
             _reactionMessages[messageId] = rule;
             return true;        
         }
         
-        public Result<IReactionRuleModel> TryGetMessage(ulong messageId)
+        public Result<ReactionRuleModelBase> TryGetMessage(ulong messageId)
         {
             if (_reactionMessages.TryGetValue(messageId, out var rule))
             {

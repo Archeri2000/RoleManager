@@ -51,7 +51,8 @@ namespace RoleManager.Commands
             var task =
                 from shouldLog in GetShouldJailBeLogged()
                 from rolesChanged in GetJailRoles()
-                select new JailConfigModel(Context.Guild.Id, shouldLog, rolesChanged);
+                from logChannel in GetJailLogChannel()
+                select new JailConfigModel(Context.Guild.Id, shouldLog, logChannel, rolesChanged);
             var res = await task;
             if (res.IsFailure()) return false;
             var model = res.Get();

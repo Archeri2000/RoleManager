@@ -98,7 +98,7 @@ namespace RoleManager.Service
             return (model, UpsertReactionMessage(model.GuildId, model.ChannelId, model.MessageId, model.Rule));
         }
 
-        private bool UpsertReactionMessage(ulong guildId, ulong channelId, ulong messageId, IReactionRuleModel rule)
+        private bool UpsertReactionMessage(ulong guildId, ulong channelId, ulong messageId, ReactionRuleModelBase rule)
         {
             if (!_reactionGuilds.TryGetValue(guildId, out var guild))
             {

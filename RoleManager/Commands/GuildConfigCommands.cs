@@ -47,8 +47,8 @@ namespace RoleManager.Commands
             await SendChannelMessage(
                 "**What is the logging channel?**");
             ulong channel = 0;
-            var result = await _interactivity.NextMessageAsync(message =>
-                MentionUtils.TryParseChannel(message.Content, out channel));
+            var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(message =>
+                MentionUtils.TryParseChannel(message.Content, out channel)));
             if (!result.IsSuccess)
             {
                 _logging.Error("Setup command timed out...");
@@ -60,7 +60,7 @@ namespace RoleManager.Commands
             await SendChannelMessage(
                 $"**What are the staff roles? (Type `skip` to skip)**");
             IEnumerable<ulong> roles = new List<ulong>();
-            result = await _interactivity.NextMessageAsync(message =>
+            result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(message =>
             {
                 try
                 {
@@ -79,7 +79,7 @@ namespace RoleManager.Commands
                 }
 
                 return true;
-            });
+            }));
             if (!result.IsSuccess)
             {
                 _logging.Error("Setup command timed out...");
@@ -161,6 +161,11 @@ namespace RoleManager.Commands
         private async Task SendChannelMessage(string msg = null, Embed embed = null)
         {
             await Context.Channel.SendMessageAsync(text:msg, embed:embed);
+        }
+        
+        private Predicate<SocketMessage> CheckUserAndChannelForMessage(Predicate<SocketMessage> filter)
+        {
+            return x => x.Author.Id == Context.User.Id && x.Channel.Id == Context.Channel.Id && filter(x);
         }
         
     }

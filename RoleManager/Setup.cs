@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Interactivity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using RoleManager.Database;
 using RoleManager.Repository;
 using RoleManager.Service;
@@ -37,6 +38,8 @@ namespace RoleManager
  		.AddSingleton<IReactionRoleRuleRepository, ReactionRoleRuleRepository>()
         .AddSingleton<IRoleEventStorageRepository, RoleEventStorageRepository>()
         .AddSingleton<IDiscordLogMessageService, DiscordLogMessageService>()
+        .AddSingleton<IJailDataRepository, JailDataRepository>()
+        .AddSingleton<IJailSettingsRepository, JailSettingsRepository>()
         .AddSingleton<ReactionRoleService>()
         .AddSingleton<GuildConfigRepository>()
         .AddSingleton<CommandHandler>()

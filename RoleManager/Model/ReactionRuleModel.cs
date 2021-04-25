@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using CSharp_Result;
 
 namespace RoleManager.Model
 {
-    public record ReactionRuleModel:IReactionRuleModel
+    public record ReactionRuleModel:ReactionRuleModelBase
     {
         public ImmutableDictionary<string, RoleManageModel> Reactions
         {
@@ -30,16 +32,17 @@ namespace RoleManager.Model
                 new KeyValuePair<string, RoleManageModel>(emote, roles);
             return this with {Reactions = Reactions.Append(newRule).ToImmutableDictionary()};
         }
-
-        public ReactionRoleConfig Config { get; init; }
     }
 
-    public interface IReactionRuleModel
+    public record ReactionRuleModelBase
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
+        public Guid Id { get; init; }
         public ReactionRoleConfig Config { get; init; }
     }
 
-    public record ReverseRuleModel : IReactionRuleModel
+    public record ReverseRuleModel : ReactionRuleModelBase
     {
         public ReactionRoleConfig Config { get; init; }
         public string Emote { get; init; }
