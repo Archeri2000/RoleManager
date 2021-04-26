@@ -54,6 +54,7 @@ namespace RoleManager.Commands
             _logging.Info($"{Context.User.Username}#{Context.User.Discriminator} in Guild {Context.Guild.Name}({Context.Guild.Id}) calling Setup Linked RR...");
             await SendChannelMessage(
                 $"**Setting up linked reaction role...** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
+            //TODO List all the options
             var result =
                 from name in GetRRName()
                 from channel in GetRRChannel()

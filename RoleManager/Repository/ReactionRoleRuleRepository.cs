@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,7 +26,20 @@ namespace RoleManager.Repository
         public async Task<Result<ReactionRoleModel>> GetReactionRole(ulong guild, string name)
         {
             var id = guild.MapUlongToLong();
-            var result = await (_context.ReactionRoleModels as IQueryable<ReactionRoleStorageModel>).FirstOrDefaultAsync(x => x.GuildId == id && x.Name == name);
+            ReactionRoleStorageModel result;
+            try
+            {
+                result =
+                    await (_context.ReactionRoleModels as IQueryable<ReactionRoleStorageModel>).FirstOrDefaultAsync(x =>
+                        x.GuildId == id && x.Name == name);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Console.WriteLine(e.InnerException);
+                throw;
+            }
+
             if (result == null)
             {
                 return new KeyNotFoundException("Unable to find guild config!");
