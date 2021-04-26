@@ -105,7 +105,8 @@ namespace RoleManager.Service
             {
                 ReactionRuleModel _ => "Rule Model",
                 ReverseRuleModel _ => "Reverse Model",
-                _ => "Base Model"
+                ReactionRuleModelBase _ => "Base Model",
+                null => "Null"
             };
         }
 
