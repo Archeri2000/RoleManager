@@ -95,7 +95,18 @@ namespace RoleManager.Service
 
         public (ReactionRoleModel reactionRole, bool succeeded) UpsertReactionMessage(ReactionRoleModel model)
         {
+            _logging.Verbose($"Writing Reaction Role from Guild:{model.GuildId}, Name:{model.Name}, Type:{GetTypeOf(model.Rule)}");
             return (model, UpsertReactionMessage(model.GuildId, model.ChannelId, model.MessageId, model.Rule));
+        }
+
+        private string GetTypeOf(ReactionRuleModelBase model)
+        {
+            return model switch
+            {
+                ReactionRuleModel _ => "Rule Model",
+                ReverseRuleModel _ => "Reverse Model",
+                _ => "Base Model"
+            };
         }
 
         private bool UpsertReactionMessage(ulong guildId, ulong channelId, ulong messageId, ReactionRuleModelBase rule)
