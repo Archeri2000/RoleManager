@@ -17,7 +17,7 @@ using static RoleManager.Utils.CommandUtils;
 
 namespace RoleManager.Commands
 {
-    public partial class JailCommands : ModuleBase<SocketCommandContext>
+    public partial class JailCommands
     {
         private const string RegexString = @"^(?:(\d+)(?:d|day|days))?(?:\s*?(\d+)\s*?(?:h|hr|hrs|hour|hours))?(?:\s*?(\d+)\s*?(?:m|min|mins|minute|minutes))?$";
         private async Task<Result<string>> GetJailReason()

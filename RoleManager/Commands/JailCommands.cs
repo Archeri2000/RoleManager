@@ -31,11 +31,13 @@ namespace RoleManager.Commands
             _jailData = jailData;
             _logging = new SourcedLoggingService(logging, "Jail");
             _client = client.Rest;
+            _logging.Verbose("Set up jail!");
         }
 
         [Command("jail", RunMode = RunMode.Async)]
         public async Task Jail(IUser u)
         {
+            _logging.Verbose("Jail function called");
             var modelResult = await CheckStaffAndRetrieveModel();
             if (modelResult.IsFailure()) return;
             
