@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CSharp_Result;
+using Microsoft.EntityFrameworkCore;
 using RoleManager.Database;
 using RoleManager.Model;
 
@@ -20,7 +21,7 @@ namespace RoleManager.Repository
         public async Task<Result<RoleUpdateModel>> Load(Guid storageKey, ulong userId)
         {
             var uid = userId.MapUlongToLong();
-            var result = await _context.Events.FirstOrDefaultAsync(x => x.User == uid && x.StorageKey == storageKey);
+            var result = await AsyncEnumerable.FirstOrDefaultAsync(_context.Events, x => x.User == uid && x.StorageKey == storageKey);
             if (result == null)
             {
                 return new KeyNotFoundException();
@@ -32,8 +33,7 @@ namespace RoleManager.Repository
         public async Task<Result<Unit>> Store(Guid storageKey, RoleUpdateModel updateModel)
         {
             var storageEvent = updateModel.ToStorage(storageKey);
-            _context.Events.Update(storageEvent);
-            await _context.SaveChangesAsync();
+             await _context.Events.Upsert(storageEvent).RunAsync();
             return new Unit();
         }
     }

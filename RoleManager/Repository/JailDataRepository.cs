@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CSharp_Result;
+using Microsoft.EntityFrameworkCore;
 using RoleManager.Database;
 using RoleManager.Model;
 using Z.EntityFramework.Plus;
@@ -21,8 +22,7 @@ namespace RoleManager.Repository
         {
             var storageData = new JailDataStorage(guildId.MapUlongToLong(), updateModel.User.MapUlongToLong(),
                 updateModel.RolesChanged.ToStorage());
-            _context.JailDatas.Update(storageData);
-            await _context.SaveChangesAsync();
+            await _context.JailDatas.Upsert(storageData).RunAsync();
             return new Unit();
         }
 
@@ -38,7 +38,7 @@ namespace RoleManager.Repository
         {
             var gid = guildId.MapUlongToLong();
             var uid = userId.MapUlongToLong();
-            var result = await _context.JailDatas.FirstOrDefaultAsync(x => x.GuildId == gid && x.UserId == uid);
+            var result = await AsyncEnumerable.FirstOrDefaultAsync(_context.JailDatas, x => x.GuildId == gid && x.UserId == uid);
             if (result == null)
             {
                 return new KeyNotFoundException();

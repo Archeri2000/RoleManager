@@ -35,8 +35,7 @@ namespace RoleManager.Repository
         {
             try
             {
-                _context.GuildConfigModels.Update(conf.ToStorage());
-                await _context.SaveChangesAsync();
+                await _context.GuildConfigModels.Upsert(conf.ToStorage()).RunAsync();
             }
             catch (Exception e)
             {

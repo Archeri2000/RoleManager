@@ -19,15 +19,15 @@ namespace RoleManager.Repository
 
         public async Task<Result<JailConfigModel>> GetJailConfig(ulong guildId)
         {
-            var result = await (_context.JailConfigModels as IQueryable<JailConfigModel>).FirstOrDefaultAsync(x => x.GuildId == guildId);
-            return result == null ? new KeyNotFoundException() : result;
+            var id = guildId.MapUlongToLong();
+            var result = await (_context.JailConfigModels as IQueryable<JailConfigStorageModel>).FirstOrDefaultAsync(x => x.GuildId == id);
+            return result == null ? new KeyNotFoundException() : result.ToDomain();
         }
 
         public async Task<Result<ulong>> StoreJailConfig(JailConfigModel config)
         {
-            var model = _context.Update(config);
-            await _context.SaveChangesAsync();
-            return model.Entity.GuildId;
+            await _context.JailConfigModels.Upsert(config.ToStorage()).RunAsync();
+            return config.GuildId;
         }
     }
 }
