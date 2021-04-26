@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace RoleManager.Model
 {
     public record ReactionRoleModel
@@ -23,7 +25,9 @@ namespace RoleManager.Model
     
     public record ReactionRoleStorageModel
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public string Name { get; init; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long GuildId { get; init; }
         public long ChannelId { get; init; }
         public long MessageId { get; init; }

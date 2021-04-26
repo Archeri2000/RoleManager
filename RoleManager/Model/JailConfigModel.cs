@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RoleManager.Model
 {
@@ -36,6 +37,7 @@ namespace RoleManager.Model
         }
         
         public JailConfigStorageModel(){}
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long GuildId { get; init; }
         public bool ShouldLog { get; init; }
         public long LogChannel { get; init; }
@@ -68,9 +70,11 @@ namespace RoleManager.Model
 
     public record JailDataStorage
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long GuildId { get; init; }
         public RoleManageStorageModel Roles { get; init; }
         
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long UserId { get; init; }
 
         public JailDataStorage(long guildId, long userId, RoleManageStorageModel roles)

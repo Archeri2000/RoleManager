@@ -97,9 +97,10 @@ namespace RoleManager.Model
         {
             return new RoleUpdateModel(User.MapLongToUlong(), RolesChanged.ToDomain());
         }
-
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public Guid StorageKey { get; init; }
         public RoleManageStorageModel RolesChanged { get; init; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long User { get; init; }
     }
 
