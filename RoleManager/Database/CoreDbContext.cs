@@ -14,32 +14,29 @@ namespace RoleManager.Database
         {
         }
         
-        public DbSet<GuildConfigModel> GuildConfigModels { get; set; }
-        public DbSet<ReactionRoleModel> ReactionRoleModels { get; set; }
+        public DbSet<GuildConfigStorageModel> GuildConfigModels { get; set; }
+        public DbSet<ReactionRoleStorageModel> ReactionRoleModels { get; set; }
         public DbSet<RoleEventStorageModel> Events { get; set; }
         private DbSet<ReactionRuleModelBase> _iReactionRuleModels { get; set; }
         public DbSet<ReactionRuleModel> ReactionRuleModels { get; set; }
         public DbSet<ReverseRuleModel> ReverseRuleModels { get; set; }
         
-        public DbSet<JailConfigModel> JailConfigModels { get; set; }
-        public DbSet<JailData> JailDatas { get; set; }
+        public DbSet<JailConfigStorageModel> JailConfigModels { get; set; }
+        public DbSet<JailDataStorage> JailDatas { get; set; }
         
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<GuildConfigModel>()
+            modelBuilder.Entity<GuildConfigStorageModel>()
                 .HasKey(x => x.GuildId);
 
-            modelBuilder.Entity<GuildConfigModel>()
-                .Ignore(x => x.StaffRoles);
-
-            modelBuilder.Entity<ReactionRoleModel>()
+            modelBuilder.Entity<ReactionRoleStorageModel>()
                 .HasKey(x => new {x.GuildId, x.Name});
 
-            modelBuilder.Entity<ReactionRoleModel>()
+            modelBuilder.Entity<ReactionRoleStorageModel>()
                 .HasOne(x => x.Rule)
                 .WithOne()
-                .HasForeignKey("ReactionRoleModel");
+                .HasForeignKey("ReactionRoleStorageModel");
             
             modelBuilder.Entity<ReactionRuleModelBase>()
                 .HasDiscriminator<string>("rule_type")
@@ -63,17 +60,17 @@ namespace RoleManager.Database
             modelBuilder.Entity<RoleEventStorageModel>()
                 .OwnsOne(x => x.RolesChanged);
 
-            modelBuilder.Entity<JailConfigModel>()
+            modelBuilder.Entity<JailConfigStorageModel>()
                 .HasKey(x => x.GuildId);
 
-            modelBuilder.Entity<JailConfigModel>()
+            modelBuilder.Entity<JailConfigStorageModel>()
                 .OwnsOne(x => x.Roles);
 
-            modelBuilder.Entity<JailData>()
+            modelBuilder.Entity<JailDataStorage>()
                 .HasKey(x => new {x.GuildId, x.UserId});
 
-            modelBuilder.Entity<JailData>()
-                .OwnsOne(x => x.Roles).OwnsOne(x => x.RolesChanged);
+            modelBuilder.Entity<JailDataStorage>()
+                .OwnsOne(x => x.Roles);
         }
     }
     

@@ -24,7 +24,33 @@ namespace RoleManager.Model
         }
         
         public RoleManageModel(){}
-    };
+        
+        public RoleManageStorageModel ToStorage()
+        {
+            return new RoleManageStorageModel(Add.Select(LongConverters.MapUlongToLong).ToList(),
+                Remove.Select(LongConverters.MapUlongToLong).ToList());
+        }
+    }
+    
+    public record RoleManageStorageModel
+    {
+        public List<long> Add { get; init; }
+        public List<long> Remove { get; init; }
+
+        public RoleManageStorageModel(IEnumerable<long> add, IEnumerable<long> remove)
+        {
+            Add = add.ToList();
+            Remove = remove.ToList();
+        }
+        
+        public RoleManageStorageModel(){}
+
+        public RoleManageModel ToDomain()
+        {
+            return new RoleManageModel(Add.Select(LongConverters.MapLongToUlong).ToList(),
+                Remove.Select(LongConverters.MapLongToUlong).ToList());
+        }
+    }
 
     public record RoleManageDomain(ImmutableList<IRole> ToAdd, ImmutableList<IRole> ToRemove)
     {
@@ -39,7 +65,7 @@ namespace RoleManager.Model
     {
         public RoleEventStorageModel ToStorage(Guid storageKey)
         {
-            return new RoleEventStorageModel(storageKey, User, RolesChanged);
+            return new RoleEventStorageModel(storageKey, User.MapUlongToLong(), RolesChanged.ToStorage());
         }
 
         public RoleUpdateModel(ulong user, RoleManageModel rolesChanged)
@@ -56,7 +82,7 @@ namespace RoleManager.Model
 
     public record RoleEventStorageModel
     {
-        public RoleEventStorageModel(Guid storageKey, ulong user, RoleManageModel rolesChanged)
+        public RoleEventStorageModel(Guid storageKey, long user, RoleManageStorageModel rolesChanged)
         {
             RolesChanged = rolesChanged;
             StorageKey = storageKey;
@@ -69,12 +95,12 @@ namespace RoleManager.Model
         }
         public RoleUpdateModel ToModel()
         {
-            return new RoleUpdateModel(User, RolesChanged);
+            return new RoleUpdateModel(User.MapLongToUlong(), RolesChanged.ToDomain());
         }
 
         public Guid StorageKey { get; init; }
-        public RoleManageModel RolesChanged { get; init; }
-        public ulong User { get; init; }
+        public RoleManageStorageModel RolesChanged { get; init; }
+        public long User { get; init; }
     }
 
     public record RoleUpdateEvent(IGuildUser User, RoleManageDomain RolesChanged)

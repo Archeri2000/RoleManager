@@ -19,7 +19,8 @@ namespace RoleManager.Repository
 
         public async Task<Result<RoleUpdateModel>> Load(Guid storageKey, ulong userId)
         {
-            var result = await _context.Events.FirstOrDefaultAsync(x => x.User == userId && x.StorageKey == storageKey);
+            var uid = userId.MapUlongToLong();
+            var result = await _context.Events.FirstOrDefaultAsync(x => x.User == uid && x.StorageKey == storageKey);
             if (result == null)
             {
                 return new KeyNotFoundException();

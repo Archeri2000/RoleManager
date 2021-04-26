@@ -44,7 +44,6 @@ namespace RoleManager.Model
 
     public record ReverseRuleModel : ReactionRuleModelBase
     {
-        public ReactionRoleConfig Config { get; init; }
         public string Emote { get; init; }
 
         public ReverseRuleModel WithEmote(string emote)

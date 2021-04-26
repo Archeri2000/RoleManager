@@ -20,13 +20,14 @@ namespace RoleManager.Repository
 
         public async Task<Result<GuildConfigModel>> GetGuildConfig(ulong guildId)
         {
-            var result = await (_context.GuildConfigModels as IQueryable<GuildConfigModel>).FirstOrDefaultAsync(x => x.GuildId == guildId);
+            var id = guildId.MapUlongToLong();
+            var result = await (_context.GuildConfigModels as IQueryable<GuildConfigStorageModel>).FirstOrDefaultAsync(x => x.GuildId == id);
             if (result == null)
             {
                 return new KeyNotFoundException("Unable to find guild config!");
             }
 
-            return result;
+            return result.ToDomain();
             //return new GuildConfigModel(826478889181511731, 831565191795834880, new List<ulong>{826480593315168266}.ToImmutableHashSet());
         }
 
@@ -34,14 +35,14 @@ namespace RoleManager.Repository
         {
             try
             {
-                _context.GuildConfigModels.Update(conf);
+                _context.GuildConfigModels.Update(conf.ToStorage());
                 await _context.SaveChangesAsync();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.InnerException.Message);
-                throw e;
+                throw;
             }
 
             return conf.GuildId;

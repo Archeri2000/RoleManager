@@ -19,23 +19,24 @@ namespace RoleManager.Repository
 
         public async Task<Result<IEnumerable<ReactionRoleModel>>> GetReactionRoles()
         {
-            return await EntityFrameworkQueryableExtensions.ToListAsync(_context.ReactionRoleModels);
+            return (await EntityFrameworkQueryableExtensions.ToListAsync(_context.ReactionRoleModels)).Select(x => x.ToDomain()).ToResult();
         }
 
         public async Task<Result<ReactionRoleModel>> GetReactionRole(ulong guild, string name)
         {
-            var result = await (_context.ReactionRoleModels as IQueryable<ReactionRoleModel>).FirstOrDefaultAsync(x => x.GuildId == guild && x.Name == name);
+            var id = guild.MapUlongToLong();
+            var result = await (_context.ReactionRoleModels as IQueryable<ReactionRoleStorageModel>).FirstOrDefaultAsync(x => x.GuildId == id && x.Name == name);
             if (result == null)
             {
                 return new KeyNotFoundException("Unable to find guild config!");
             }
 
-            return result;
+            return result.ToDomain();
         }
 
         public async Task<bool> AddOrUpdateReactionRole(ReactionRoleModel reactionRole)
         {
-            _context.ReactionRoleModels.Update(reactionRole);
+            _context.ReactionRoleModels.Update(reactionRole.ToStorage());
             await _context.SaveChangesAsync();
             return true;
         }

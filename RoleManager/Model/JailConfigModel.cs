@@ -17,6 +17,35 @@ namespace RoleManager.Model
         public bool ShouldLog { get; init; }
         public ulong LogChannel { get; init; }
         public RoleManageModel Roles { get; init; }
+        
+        public JailConfigStorageModel ToStorage()
+        {
+            return new JailConfigStorageModel(GuildId.MapUlongToLong(), ShouldLog, LogChannel.MapUlongToLong(),
+                Roles.ToStorage());
+        }
+    }
+    
+    public record JailConfigStorageModel
+    {
+        public JailConfigStorageModel(long guildId, bool shouldLog, long logChannel, RoleManageStorageModel roles)
+        {
+            GuildId = guildId;
+            ShouldLog = shouldLog;
+            LogChannel = logChannel;
+            Roles = roles;
+        }
+        
+        public JailConfigStorageModel(){}
+        public long GuildId { get; init; }
+        public bool ShouldLog { get; init; }
+        public long LogChannel { get; init; }
+        public RoleManageStorageModel Roles { get; init; }
+
+        public JailConfigModel ToDomain()
+        {
+            return new JailConfigModel(GuildId.MapLongToUlong(), ShouldLog, LogChannel.MapLongToUlong(),
+                Roles.ToDomain());
+        }
     }
 
     public record JailTimeSpan(int Days, int Hours, int Minutes)
@@ -37,20 +66,20 @@ namespace RoleManager.Model
         }
     }
 
-    public record JailData
+    public record JailDataStorage
     {
-        public ulong GuildId { get; init; }
-        public RoleUpdateModel Roles { get; init; }
+        public long GuildId { get; init; }
+        public RoleManageStorageModel Roles { get; init; }
         
-        public ulong UserId { get; init; }
+        public long UserId { get; init; }
 
-        public JailData(ulong guildId, RoleUpdateModel roles)
+        public JailDataStorage(long guildId, long userId, RoleManageStorageModel roles)
         {
-            UserId = Roles.User;
+            UserId = userId;
             GuildId = guildId;
             Roles = roles;
         }
         
-        public JailData(){}
+        public JailDataStorage(){}
     }
 }
