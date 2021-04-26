@@ -25,6 +25,7 @@ namespace RoleManager.Repository
 
         public async Task<Result<ReactionRoleModel>> GetReactionRole(ulong guild, string name)
         {
+            Console.WriteLine($"GetRR Called with {guild} and {name}");
             var id = guild.MapUlongToLong();
             ReactionRoleStorageModel result;
             try
