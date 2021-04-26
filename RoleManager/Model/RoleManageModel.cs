@@ -84,9 +84,10 @@ namespace RoleManager.Model
     {
         public RoleEventStorageModel(Guid storageKey, long user, RoleManageStorageModel rolesChanged)
         {
-            RolesChanged = rolesChanged;
             StorageKey = storageKey;
             User = user;
+            Add = rolesChanged.Add;
+            Remove = rolesChanged.Remove;
         }
 
         public RoleEventStorageModel()
@@ -95,13 +96,16 @@ namespace RoleManager.Model
         }
         public RoleUpdateModel ToModel()
         {
-            return new RoleUpdateModel(User.MapLongToUlong(), RolesChanged.ToDomain());
+            return new RoleUpdateModel(User.MapLongToUlong(), new RoleManageModel(Add.Select(LongConverters.MapLongToUlong).ToList(), Remove.Select(LongConverters.MapLongToUlong).ToList()));
         }
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public Guid StorageKey { get; init; }
-        public RoleManageStorageModel RolesChanged { get; init; }
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long User { get; init; }
+        
+        public List<long> Add { get; init; }
+        
+        public List<long> Remove { get; init; }
     }
 
     public record RoleUpdateEvent(IGuildUser User, RoleManageDomain RolesChanged)

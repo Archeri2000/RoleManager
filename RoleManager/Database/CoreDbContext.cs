@@ -68,9 +68,6 @@ namespace RoleManager.Database
             modelBuilder.Entity<RoleEventStorageModel>()
                 .HasKey(x => new {x.StorageKey, x.User});
 
-            modelBuilder.Entity<RoleEventStorageModel>()
-                .OwnsOne(x => x.RolesChanged);
-
             modelBuilder.Entity<JailConfigStorageModel>()
                 .HasKey(x => x.GuildId);
 
