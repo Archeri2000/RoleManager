@@ -41,14 +41,13 @@ namespace RoleManager.Model
 
     public record ReactionRuleModelBase
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
-        public Guid Id { get; init; }
+        public Guid Id { get; set; }
         public ReactionRoleConfig Config { get; init; }
 
         public ReactionRuleModelBase(ReactionRoleConfig config)
         {
-            Id = Guid.NewGuid();
             Config = config;
         }
         

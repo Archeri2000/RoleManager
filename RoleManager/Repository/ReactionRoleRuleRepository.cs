@@ -56,12 +56,16 @@ namespace RoleManager.Repository
         {
             try
             {
-                await (reactionRole.Rule switch
+                var id = reactionRole.Rule switch
                 {
-                    ReactionRuleModel model => _context.ReactionRuleModels.Upsert(model).On(x => x.Id).RunAsync(),
-                    ReverseRuleModel model => _context.ReverseRuleModels.Upsert(model).On(x => x.Id).RunAsync()
-                });
-                await _context.ReactionRoleModels.Upsert(reactionRole.ToStorage()).On(x => new {x.Name, x.GuildId})
+                    ReactionRuleModel model => _context.ReactionRuleModels.Update(model).Entity.Id,
+                    ReverseRuleModel model => _context.ReverseRuleModels.Update(model).Entity.Id
+                };
+                await _context.SaveChangesAsync();
+                var storage = reactionRole.ToStorage() with {RuleId = id};
+                await _context.ReactionRoleModels
+                    .Upsert(storage)
+                    .On(x => new {x.Name, x.GuildId})
                     .RunAsync();
             }
             catch (Exception e)

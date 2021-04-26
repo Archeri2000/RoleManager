@@ -12,7 +12,6 @@ namespace RoleManager.Model
             ChannelId = channelId;
             MessageId = messageId;
             Rule = rule;
-            RuleId = rule.Id;
         }
         
         public ReactionRoleModel(){}
@@ -23,8 +22,6 @@ namespace RoleManager.Model
         public ulong MessageId { get; init; }
         public ReactionRuleModelBase Rule { get; init; }
         
-        public Guid RuleId { get; init; }
-        
         public ReactionRoleStorageModel ToStorage()
         {
             return new ReactionRoleStorageModel()
@@ -33,8 +30,7 @@ namespace RoleManager.Model
                 GuildId = GuildId.MapUlongToLong(),
                 ChannelId = ChannelId.MapUlongToLong(),
                 MessageId = MessageId.MapUlongToLong(),
-                Rule = Rule,
-                RuleId = RuleId
+                Rule = Rule
             };
         }
     }
@@ -60,8 +56,8 @@ namespace RoleManager.Model
                 GuildId = GuildId.MapLongToUlong(),
                 ChannelId = ChannelId.MapLongToUlong(),
                 MessageId = MessageId.MapLongToUlong(),
-                Rule = Rule,
-                RuleId = RuleId
+                Rule = Rule
+                
             };
         }
     }
