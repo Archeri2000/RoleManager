@@ -20,7 +20,7 @@ namespace RoleManager.Repository
 
         public async Task<Result<IEnumerable<ReactionRoleModel>>> GetReactionRoles()
         {
-            return (await EntityFrameworkQueryableExtensions.ToListAsync(_context.ReactionRoleModels)).Select(x => x.ToDomain()).ToResult();
+            return (await _context.ReactionRoleModels.Include(x => x.Rule).ToListAsync()).Select(x => x.ToDomain()).ToResult();
         }
 
         public async Task<Result<ReactionRoleModel>> GetReactionRole(ulong guild, string name)
@@ -31,7 +31,9 @@ namespace RoleManager.Repository
             try
             {
                 result =
-                    await (_context.ReactionRoleModels as IQueryable<ReactionRoleStorageModel>).FirstOrDefaultAsync(x =>
+                    await _context.ReactionRoleModels
+                        .Include(x => x.Rule)
+                        .FirstOrDefaultAsync(x =>
                         x.GuildId == id && x.Name == name);
             }
             catch (Exception e)
