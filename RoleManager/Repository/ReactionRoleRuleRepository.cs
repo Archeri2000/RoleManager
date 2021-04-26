@@ -40,8 +40,9 @@ namespace RoleManager.Repository
                 Console.WriteLine(e.InnerException);
                 throw;
             }
-
-            if (result == null)
+            
+            Console.WriteLine($"Result is: {(result is null?"null":"not null")}");
+            if (result is null)
             {
                 return new KeyNotFoundException("Unable to find guild config!");
             }
