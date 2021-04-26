@@ -56,6 +56,11 @@ namespace RoleManager.Repository
         {
             try
             {
+                await (reactionRole.Rule switch
+                {
+                    ReactionRuleModel model => _context.ReactionRuleModels.Upsert(model).On(x => x.Id).RunAsync(),
+                    ReverseRuleModel model => _context.ReverseRuleModels.Upsert(model).On(x => x.Id).RunAsync()
+                });
                 await _context.ReactionRoleModels.Upsert(reactionRole.ToStorage()).On(x => new {x.Name, x.GuildId})
                     .RunAsync();
             }
