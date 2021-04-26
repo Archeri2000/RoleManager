@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace RoleManager.Model
@@ -38,6 +39,7 @@ namespace RoleManager.Model
     
     public record GuildConfigStorageModel
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long GuildId { get; init; }
         public long LogChannel { get; init; }
         public List<long> Roles { get; init; }
