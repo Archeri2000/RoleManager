@@ -71,14 +71,8 @@ namespace RoleManager.Database
             modelBuilder.Entity<JailConfigStorageModel>()
                 .HasKey(x => x.GuildId);
 
-            modelBuilder.Entity<JailConfigStorageModel>()
-                .OwnsOne(x => x.Roles);
-
             modelBuilder.Entity<JailDataStorage>()
                 .HasKey(x => new {x.GuildId, x.UserId});
-
-            modelBuilder.Entity<JailDataStorage>()
-                .OwnsOne(x => x.Roles);
         }
     }
     

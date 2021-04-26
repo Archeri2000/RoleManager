@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RoleManager.Model
@@ -33,7 +34,8 @@ namespace RoleManager.Model
             GuildId = guildId;
             ShouldLog = shouldLog;
             LogChannel = logChannel;
-            Roles = roles;
+            Add = roles.Add;
+            Remove = roles.Remove;
         }
         
         public JailConfigStorageModel(){}
@@ -41,12 +43,15 @@ namespace RoleManager.Model
         public long GuildId { get; init; }
         public bool ShouldLog { get; init; }
         public long LogChannel { get; init; }
-        public RoleManageStorageModel Roles { get; init; }
+        
+        public List<long> Add { get; init; }
+        
+        public List<long> Remove { get; init; }
 
         public JailConfigModel ToDomain()
         {
             return new JailConfigModel(GuildId.MapLongToUlong(), ShouldLog, LogChannel.MapLongToUlong(),
-                Roles.ToDomain());
+                new RoleManageModel(Add, Remove));
         }
     }
 
@@ -72,8 +77,6 @@ namespace RoleManager.Model
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long GuildId { get; init; }
-        public RoleManageStorageModel Roles { get; init; }
-        
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long UserId { get; init; }
 
@@ -81,8 +84,13 @@ namespace RoleManager.Model
         {
             UserId = userId;
             GuildId = guildId;
-            Roles = roles;
+            Add = roles.Add;
+            Remove = roles.Remove;
         }
+        
+        public List<long> Add { get; init; }
+        
+        public List<long> Remove { get; init; }
         
         public JailDataStorage(){}
     }

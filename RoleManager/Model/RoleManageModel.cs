@@ -22,6 +22,12 @@ namespace RoleManager.Model
             Add = add.ToList();
             Remove = remove.ToList();
         }
+
+        public RoleManageModel(IEnumerable<long> add, IEnumerable<long> remove)
+        {
+            Add = add.Select(LongConverters.MapLongToUlong).ToList();
+            Remove = remove.Select(LongConverters.MapLongToUlong).ToList();
+        }
         
         public RoleManageModel(){}
         
@@ -47,8 +53,7 @@ namespace RoleManager.Model
 
         public RoleManageModel ToDomain()
         {
-            return new RoleManageModel(Add.Select(LongConverters.MapLongToUlong).ToList(),
-                Remove.Select(LongConverters.MapLongToUlong).ToList());
+            return new RoleManageModel(Add, Remove);
         }
     }
 
@@ -96,7 +101,7 @@ namespace RoleManager.Model
         }
         public RoleUpdateModel ToModel()
         {
-            return new RoleUpdateModel(User.MapLongToUlong(), new RoleManageModel(Add.Select(LongConverters.MapLongToUlong).ToList(), Remove.Select(LongConverters.MapLongToUlong).ToList()));
+            return new RoleUpdateModel(User.MapLongToUlong(), new RoleManageModel(Add, Remove));
         }
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public Guid StorageKey { get; init; }

@@ -43,7 +43,7 @@ namespace RoleManager.Repository
             {
                 return new KeyNotFoundException();
             }
-            return new RoleUpdateModel(result.UserId.MapLongToUlong(), result.Roles.ToDomain());
+            return new RoleUpdateModel(result.UserId.MapLongToUlong(), new RoleManageModel(result.Add, result.Remove));
         }
     }
 }
