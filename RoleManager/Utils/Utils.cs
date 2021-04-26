@@ -7,6 +7,7 @@ using CSharp_Result;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using RoleManager.Model;
 using RoleManager.Service;
 
@@ -73,5 +74,5 @@ namespace RoleManager.Utils
                 Failure: x => Task.FromResult((Result<TOut>)x));
         }
     }
-    
+
 }

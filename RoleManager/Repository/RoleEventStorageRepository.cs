@@ -33,7 +33,20 @@ namespace RoleManager.Repository
         public async Task<Result<Unit>> Store(Guid storageKey, RoleUpdateModel updateModel)
         {
             var storageEvent = updateModel.ToStorage(storageKey);
-             await _context.Events.Upsert(storageEvent).RunAsync();
+            var entity =
+                (_context.Events as IQueryable<RoleEventStorageModel>)
+                    .FirstOrDefaultAsync(x =>
+                        x.StorageKey == storageEvent.StorageKey && x.User == storageEvent.User);
+            if (entity is null)
+            {
+                _context.Events.Add(storageEvent);
+            }
+            else
+            {
+                _context.Entry(entity).CurrentValues.SetValues(storageEvent);
+            }
+
+            await _context.SaveChangesAsync();
             return new Unit();
         }
     }

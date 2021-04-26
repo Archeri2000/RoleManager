@@ -26,7 +26,21 @@ namespace RoleManager.Repository
 
         public async Task<Result<ulong>> StoreJailConfig(JailConfigModel config)
         {
-            await _context.JailConfigModels.Upsert(config.ToStorage()).RunAsync();
+            var storage = config.ToStorage();
+            var entity =
+                (_context.JailConfigModels as IQueryable<JailConfigStorageModel>)
+                    .FirstOrDefaultAsync(x =>
+                        x.GuildId == storage.GuildId);
+            if (entity is null)
+            {
+                _context.JailConfigModels.Add(storage);
+            }
+            else
+            {
+                _context.Entry(entity).CurrentValues.SetValues(storage);
+            }
+
+            await _context.SaveChangesAsync();
             return config.GuildId;
         }
     }

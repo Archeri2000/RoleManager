@@ -20,9 +20,22 @@ namespace RoleManager.Repository
 
         public async Task<Result<Unit>> Store(ulong guildId, RoleUpdateModel updateModel)
         {
-            var storageData = new JailDataStorage(guildId.MapUlongToLong(), updateModel.User.MapUlongToLong(),
+            var storage = new JailDataStorage(guildId.MapUlongToLong(), updateModel.User.MapUlongToLong(),
                 updateModel.RolesChanged.ToStorage());
-            await _context.JailDatas.Upsert(storageData).RunAsync();
+            var entity =
+                (_context.JailDatas as IQueryable<JailDataStorage>)
+                    .FirstOrDefaultAsync(x =>
+                        x.GuildId == storage.GuildId && x.UserId == storage.UserId);
+            if (entity is null)
+            {
+                _context.JailDatas.Add(storage);
+            }
+            else
+            {
+                _context.Entry(entity).CurrentValues.SetValues(storage);
+            }
+
+            await _context.SaveChangesAsync();
             return new Unit();
         }
 

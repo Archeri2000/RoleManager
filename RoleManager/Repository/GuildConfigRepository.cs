@@ -33,7 +33,21 @@ namespace RoleManager.Repository
 
         public async Task<Result<ulong>> StoreGuildConfig(GuildConfigModel conf)
         {
-            await _context.GuildConfigModels.Upsert(conf.ToStorage()).On(x => x.GuildId).RunAsync();
+            var storage = conf.ToStorage();
+            var entity =
+                (_context.GuildConfigModels as IQueryable<GuildConfigStorageModel>)
+                    .FirstOrDefaultAsync(x =>
+                        x.GuildId == storage.GuildId);
+            if (entity is null)
+            {
+                _context.GuildConfigModels.Add(storage);
+            }
+            else
+            {
+                _context.Entry(entity).CurrentValues.SetValues(storage);
+            }
+
+            await _context.SaveChangesAsync();
             return conf.GuildId;
         }
     }

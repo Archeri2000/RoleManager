@@ -63,10 +63,20 @@ namespace RoleManager.Repository
                 };
                 await _context.SaveChangesAsync();
                 var storage = reactionRole.ToStorage() with {RuleId = id};
-                await _context.ReactionRoleModels
-                    .Upsert(storage)
-                    .On(x => new {x.Name, x.GuildId})
-                    .RunAsync();
+                var entity =
+                    _context.ReactionRoleModels.Include(x => x.Rule)
+                        .FirstOrDefaultAsync(x =>
+                        x.Name == storage.Name && x.GuildId == storage.GuildId);
+                if (entity is null)
+                {
+                    _context.ReactionRoleModels.Add(storage);
+                }
+                else
+                {
+                    _context.Entry(entity).CurrentValues.SetValues(storage);
+                }
+
+                await _context.SaveChangesAsync();
             }
             catch (Exception e)
             {
