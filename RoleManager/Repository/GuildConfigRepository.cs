@@ -40,8 +40,8 @@ namespace RoleManager.Repository
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                Console.WriteLine(e.InnerException.Message);
+                Console.WriteLine(e);
+                Console.WriteLine(e.InnerException);
                 throw;
             }
 
