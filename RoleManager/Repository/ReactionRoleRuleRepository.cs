@@ -36,7 +36,7 @@ namespace RoleManager.Repository
 
         public async Task<bool> AddOrUpdateReactionRole(ReactionRoleModel reactionRole)
         {
-            await _context.ReactionRoleModels.Upsert(reactionRole.ToStorage()).RunAsync();
+            await _context.ReactionRoleModels.Upsert(reactionRole.ToStorage()).On(x => new {x.Name, x.GuildId}).RunAsync();
             return true;
         }
     }
