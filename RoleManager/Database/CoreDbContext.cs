@@ -35,7 +35,7 @@ namespace RoleManager.Database
             modelBuilder.Entity<ReactionRoleStorageModel>()
                 .HasOne(x => x.Rule)
                 .WithOne()
-                .HasForeignKey("ReactionRoleStorageModel");
+                .HasForeignKey<ReactionRoleStorageModel>(x => x.RuleId);
 
             // modelBuilder.Entity<ReactionRuleModelBase>()
             //     .HasDiscriminator<string>("rule_type")

@@ -65,15 +65,13 @@ namespace RoleManager.Commands
                 from shouldLog in GetShouldRRBeLogged()
                 from shouldSave in GetShouldRRBeSaved()
                 select new ReactionRoleModel
-                {
-                    Name = name,
-                    ChannelId = channel,
-                    GuildId = Context.Guild.Id,
-                    Rule = new ReactionRuleModel
-                    {
-                        Config = new ReactionRoleConfig(shouldRemove, shouldLog, shouldSave, rrId, name)
-                    }
-                };
+                (
+                    name:name,
+                    channelId:channel,
+                    guildId:Context.Guild.Id,
+                    messageId:0,
+                    rule:new ReactionRuleModel(new ReactionRoleConfig(shouldRemove, shouldLog, shouldSave, rrId, name))
+                );
 
             var rr = await result;
             if (rr.IsFailure()) return false;

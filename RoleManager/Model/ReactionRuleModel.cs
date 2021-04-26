@@ -10,6 +10,11 @@ namespace RoleManager.Model
 {
     public record ReactionRuleModel:ReactionRuleModelBase
     {
+        public ReactionRuleModel(){}
+        public ReactionRuleModel(ReactionRoleConfig config) : base(config)
+        {
+            
+        }
         public ImmutableDictionary<string, RoleManageModel> Reactions
         {
             get;
@@ -36,14 +41,27 @@ namespace RoleManager.Model
 
     public record ReactionRuleModelBase
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Key]
         public Guid Id { get; init; }
         public ReactionRoleConfig Config { get; init; }
+
+        public ReactionRuleModelBase(ReactionRoleConfig config)
+        {
+            Id = Guid.NewGuid();
+            Config = config;
+        }
+        
+        public ReactionRuleModelBase(){}
     }
 
     public record ReverseRuleModel : ReactionRuleModelBase
     {
+        public ReverseRuleModel(){}
+        public ReverseRuleModel(ReactionRoleConfig config):base(config)
+        {
+            
+        }
         public string Emote { get; init; }
 
         public ReverseRuleModel WithEmote(string emote)

@@ -62,15 +62,13 @@ namespace RoleManager.Commands
                 from shouldLog in GetShouldRRBeLogged()
                 from rrId in GetRRStorageKey()
                 select new ReactionRoleModel
-                {
-                    Name = name,
-                    ChannelId = channel,
-                    GuildId = Context.Guild.Id,
-                    Rule = new ReverseRuleModel()
-                    {
-                        Config = new ReactionRoleConfig(shouldRemove, shouldLog, false, rrId, name)
-                    }
-                };
+                (
+                    name:name,
+                    channelId:channel,
+                    guildId:Context.Guild.Id,
+                    messageId:0,
+                    rule:new ReverseRuleModel(new ReactionRoleConfig(shouldRemove, shouldLog, false, rrId, name))
+                );
 
             var rr = await result;
             if (rr.IsFailure()) return false;
