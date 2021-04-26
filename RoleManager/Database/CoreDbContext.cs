@@ -17,7 +17,6 @@ namespace RoleManager.Database
         public DbSet<GuildConfigStorageModel> GuildConfigModels { get; set; }
         public DbSet<ReactionRoleStorageModel> ReactionRoleModels { get; set; }
         public DbSet<RoleEventStorageModel> Events { get; set; }
-        private DbSet<ReactionRuleModelBase> _iReactionRuleModels { get; set; }
         public DbSet<ReactionRuleModel> ReactionRuleModels { get; set; }
         public DbSet<ReverseRuleModel> ReverseRuleModels { get; set; }
         
@@ -38,15 +37,27 @@ namespace RoleManager.Database
                 .WithOne()
                 .HasForeignKey("ReactionRoleStorageModel");
             
-            modelBuilder.Entity<ReactionRuleModelBase>()
-                .HasDiscriminator<string>("rule_type")
-                .HasValue<ReactionRuleModel>("reaction_role")
-                .HasValue<ReverseRuleModel>("linked_reaction_role");
+            // modelBuilder.Entity<ReactionRuleModelBase>()
+            //     .HasDiscriminator<string>("rule_type")
+            //     .HasValue<ReactionRuleModel>("reaction_role")
+            //     .HasValue<ReverseRuleModel>("linked_reaction_role");
+            //
+            // modelBuilder.Entity<ReactionRuleModelBase>()
+            //     .OwnsOne(x => x.Config);
+            //
+            // modelBuilder.Entity<ReactionRuleModelBase>().HasKey(x => x.Id);
 
-            modelBuilder.Entity<ReactionRuleModelBase>()
+            modelBuilder.Entity<ReverseRuleModel>()
                 .OwnsOne(x => x.Config);
 
-            modelBuilder.Entity<ReactionRuleModelBase>().HasKey(x => x.Id);
+            modelBuilder.Entity<ReverseRuleModel>()
+                .HasBaseType<ReactionRuleModelBase>();
+
+            modelBuilder.Entity<ReactionRuleModel>()
+                .HasBaseType<ReactionRuleModelBase>();
+
+            modelBuilder.Entity<ReactionRuleModel>()
+                .OwnsOne(x => x.Config);
             
             modelBuilder.Entity<ReactionRuleModel>()
                 .Property(b => b.Reactions)
