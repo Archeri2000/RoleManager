@@ -33,17 +33,7 @@ namespace RoleManager.Repository
 
         public async Task<Result<ulong>> StoreGuildConfig(GuildConfigModel conf)
         {
-            try
-            {
-                await _context.GuildConfigModels.Upsert(conf.ToStorage()).On(x => x.GuildId).RunAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                Console.WriteLine(e.InnerException);
-                throw;
-            }
-
+            await _context.GuildConfigModels.Upsert(conf.ToStorage()).On(x => x.GuildId).RunAsync();
             return conf.GuildId;
         }
     }
