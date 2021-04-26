@@ -23,7 +23,7 @@ namespace RoleManager.Repository
             var storage = new JailDataStorage(guildId.MapUlongToLong(), updateModel.User.MapUlongToLong(),
                 updateModel.RolesChanged.ToStorage());
             var entity =
-                (_context.JailDatas as IQueryable<JailDataStorage>)
+                await (_context.JailDatas as IQueryable<JailDataStorage>)
                     .FirstOrDefaultAsync(x =>
                         x.GuildId == storage.GuildId && x.UserId == storage.UserId);
             if (entity is null)

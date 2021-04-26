@@ -35,7 +35,7 @@ namespace RoleManager.Repository
         {
             var storage = conf.ToStorage();
             var entity =
-                (_context.GuildConfigModels as IQueryable<GuildConfigStorageModel>)
+                await (_context.GuildConfigModels as IQueryable<GuildConfigStorageModel>)
                     .FirstOrDefaultAsync(x =>
                         x.GuildId == storage.GuildId);
             if (entity is null)

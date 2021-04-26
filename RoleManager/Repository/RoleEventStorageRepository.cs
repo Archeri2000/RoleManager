@@ -34,7 +34,7 @@ namespace RoleManager.Repository
         {
             var storageEvent = updateModel.ToStorage(storageKey);
             var entity =
-                (_context.Events as IQueryable<RoleEventStorageModel>)
+                await (_context.Events as IQueryable<RoleEventStorageModel>)
                     .FirstOrDefaultAsync(x =>
                         x.StorageKey == storageEvent.StorageKey && x.User == storageEvent.User);
             if (entity is null)
