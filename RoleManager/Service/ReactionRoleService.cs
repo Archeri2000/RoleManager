@@ -83,7 +83,7 @@ namespace RoleManager.Service
                 {
                     var (update, _) = x;
                     _logging.Info($"Successfully added [{update.RolesChanged.ToAdd.Stringify()}] " +
-                                         $"and removed [{update.RolesChanged.ToRemove.Stringify()}] on { update.User.Username + update.User.DiscriminatorValue}!");
+                                         $"and removed [{update.RolesChanged.ToRemove.Stringify()}] on { update.User.Username}#{update.User.DiscriminatorValue}!");
                 },
                 Failure: x =>
                 {

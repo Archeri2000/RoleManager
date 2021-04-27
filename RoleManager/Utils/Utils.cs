@@ -35,8 +35,20 @@ namespace RoleManager.Utils
 
         public static async Task<RoleUpdateEvent> EditRoles(this IGuildUser user, RoleManageDomain rolesToChange)
         {
-            user.RemoveRolesAsync(rolesToChange.ToRemove);
-            user.AddRolesAsync(rolesToChange.ToAdd);
+            while (true)
+            {
+                try
+                {
+                    await user.RemoveRolesAsync(rolesToChange.ToRemove);
+                    await user.AddRolesAsync(rolesToChange.ToAdd);
+                    break;
+                }catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                    continue;
+                }
+            }
+
             return new RoleUpdateEvent(user, rolesToChange);
         }
 
