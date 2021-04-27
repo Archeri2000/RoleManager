@@ -26,6 +26,7 @@ namespace RoleManager.Service
             _jailData = jailData;
             _logging = new SourcedLoggingService(logging, "Unjail");
             _client = client.Rest;
+            _logging.Info("Unjail setup");
         }
 
 

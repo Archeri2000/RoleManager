@@ -34,6 +34,7 @@ namespace RoleManager.Commands
             _unjail = unjail;
             _logging = new SourcedLoggingService(logging, "Jail");
             _client = client.Rest;
+            _logging.Info("Jail commands setup");
         }
 
         [Command("jail", RunMode = RunMode.Async)]
