@@ -78,7 +78,7 @@ namespace RoleManager.Service
                 Console.WriteLine("firing event!");
                 if(!t.IsCanceled)
                 {
-                    await UnjailUser(updateEvent.ToModel(), logChannel, userId);
+                    await UnjailUser(updateEvent.ToModel(), logChannel, guildId);
                     _tokenSources.Remove((guildId, userId), out _);
                 }
             });
