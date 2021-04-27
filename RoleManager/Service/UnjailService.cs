@@ -21,7 +21,14 @@ namespace RoleManager.Service
         private readonly DiscordSocketRestClient _client;
         private readonly ConcurrentDictionary<(ulong guildId, ulong userId), CancellationTokenSource> _tokenSources = new();
 
-        
+        public UnjailService(IJailDataRepository jailData, ILoggingService logging, DiscordSocketClient client)
+        {
+            _jailData = jailData;
+            _logging = new SourcedLoggingService(logging, "Unjail");
+            _client = client.Rest;
+        }
+
+
         public async Task UnjailUser(RoleUpdateModel model, ulong logChannel, ulong guildId)
         {
             var guild = await _client.GetGuildAsync(guildId);
