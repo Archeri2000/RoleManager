@@ -33,13 +33,17 @@ namespace RoleManager.Service
 
         public async Task UnjailUser(RoleUpdateModel model, ulong logChannel, ulong guildId)
         {
+            _logging.Verbose("Unjail called");
             var guild = await _client.GetGuildAsync(guildId);
+            _logging.Verbose("Guild found");
             var roles = new RoleManageDomain(model.RolesChanged.ToRemove.Select(x => (IRole)guild.GetRole(x)).ToImmutableList(),
                 model.RolesChanged.ToAdd.Select(x => (IRole)guild.GetRole(x)).ToImmutableList());
+            _logging.Verbose("Roles obtained");
             var result =
                 from user in _client.GetGuildUser(guildId, model.User)
                 select user.EditRoles(roles);
             var res = await result;
+            _logging.Verbose("Result gotten");
             if (res.IsFailure())
             {
                 await TrySendLogMessage(guild, logChannel, $"Unable to unjail User {MentionUtils.MentionUser(model.User)}!");
@@ -47,7 +51,7 @@ namespace RoleManager.Service
             else
             {
                 await TrySendLogMessage(guild, logChannel,
-                    $"Successfully unjailed User {MentionUtils.MentionUser(model.User)}!");
+                    $"> Successfully unjailed User {MentionUtils.MentionUser(model.User)}!");
                 await _jailData.Delete(guildId, model.User);
             }
         }

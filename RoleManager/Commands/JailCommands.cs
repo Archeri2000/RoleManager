@@ -98,7 +98,7 @@ namespace RoleManager.Commands
             var dura = durationResult.Get();
             await _unjail.ScheduleUnjail(dura, updateEvent, logChannel);
             await TrySendLogMessage(logChannel,
-                    $"User {MentionUtils.MentionUser(updateEvent.User.Id)} will be unjailed automatically in {dura}.");
+                    $"> User {MentionUtils.MentionUser(updateEvent.User.Id)} will be unjailed automatically in {dura}.");
         }
         private async Task<Result<GuildConfigModel>> CheckStaffAndRetrieveModel()
         {
