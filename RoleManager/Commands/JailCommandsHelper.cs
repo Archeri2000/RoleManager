@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CSharp_Result;
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using Discord.WebSocket;
 using Interactivity;
 using RoleManager.Model;
@@ -37,7 +38,7 @@ namespace RoleManager.Commands
                 _logging.Error("Jail config timed out...");
                 return new TimeoutException();
             }
-            await SendChannelMessage(
+            await SendUserMessage(
                 $"> **Configuring jailing reason as: {content}**");
             return content;
         }
@@ -66,33 +67,28 @@ namespace RoleManager.Commands
                 _logging.Error("Jail config timed out...");
                 return new TimeoutException();
             }
-            await SendChannelMessage(
+            await SendUserMessage(
                 $"> **Configuring jailing timing as: {content}**");
             return new JailTimeSpan(int.Parse(group[1].Value == ""?"0":group[1].Value), 
                 int.Parse(group[2].Value == ""?"0":group[2].Value), 
                 int.Parse(group[3].Value == ""?"0":group[3].Value));
         }
 
-        private async Task UnjailUser(RoleUpdateModel model, ulong logChannel)
+        private async Task<Result<RestGuildUser>> GetTarget()
         {
-            var roles = new RoleManageDomain(model.RolesChanged.ToRemove.Select(x => (IRole)Context.Guild.GetRole(x)).ToImmutableList(),
-                model.RolesChanged.ToAdd.Select(x => (IRole)Context.Guild.GetRole(x)).ToImmutableList());
-            var result =
-                from user in _client.GetGuildUser(Context.Guild.Id, model.User)
-                select user.EditRoles(roles);
-            var res = await result;
-            if (res.IsFailure())
-            {
-                await TrySendLogMessage(logChannel, $"Unable to unjail User {MentionUtils.MentionUser(model.User)}!");
-            }
-            else
-            {
-                await TrySendLogMessage(logChannel,
-                    $"Successfully unjailed User {MentionUtils.MentionUser(model.User)}!");
-                await _jailData.Delete(Context.Guild.Id, model.User);
-            }
+            if (!MentionUtils.TryParseUser(Context.Message.Content, out var userId)) return new ArgumentException("No User was specified!");
+            var user = await _client
+                .GetGuildUser(Context.Guild.Id, userId)
+                .IfAwait(async x =>
+                {
+                    var jailEntry = await _jailData.Load(Context.Guild.Id, userId);
+                    if (jailEntry.IsFailure()) return true;
+                    await SendUserMessage($"User {x.Username}{x.Discriminator} has already been jailed!");
+                    return false;
+                });
+            return user;
         }
-
+        
         private async Task<Result<Unit>> SendJailLog(string reason, JailTimeSpan duration, RoleUpdateEvent target, ulong channel)
         {
             var embed = CreateJailLogEmbed(reason, duration, Context.User, target);

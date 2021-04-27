@@ -40,8 +40,8 @@ namespace RoleManager
         .AddSingleton<IDiscordLogMessageService, DiscordLogMessageService>()
         .AddSingleton<IJailDataRepository, JailDataRepository>()
         .AddSingleton<IJailSettingsRepository, JailSettingsRepository>()
+        .AddSingleton<UnjailService>()
         .AddSingleton<ReactionRoleService>()
-        .AddSingleton<GuildConfigRepository>()
         .AddSingleton<CommandHandler>()
         .AddSingleton(new InteractivityService(_client, TimeSpan.FromMinutes(1)))
         .BuildServiceProvider();

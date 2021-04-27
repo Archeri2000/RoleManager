@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using CSharp_Result;
 using Discord;
@@ -22,42 +23,42 @@ namespace RoleManager.Commands
         private readonly IJailSettingsRepository _jailSettings;
         private readonly SourcedLoggingService _logging;
         private readonly DiscordSocketRestClient _client;
+        private readonly UnjailService _unjail;
 
-        public JailCommands(InteractivityService interactivity, IGuildConfigRepository repo, IJailSettingsRepository jailSettings, ILoggingService logging, DiscordSocketClient client, IJailDataRepository jailData)
+        public JailCommands(InteractivityService interactivity, IGuildConfigRepository repo, IJailSettingsRepository jailSettings, ILoggingService logging, DiscordSocketClient client, IJailDataRepository jailData, UnjailService unjail)
         {
             _interactivity = interactivity;
             _repo = repo;
             _jailSettings = jailSettings;
             _jailData = jailData;
+            _unjail = unjail;
             _logging = new SourcedLoggingService(logging, "Jail");
             _client = client.Rest;
-            _logging.Verbose("Set up jail!");
         }
 
         [Command("jail", RunMode = RunMode.Async)]
-        public async Task Jail(IUser u)
+        public async Task Jail()
         {
             _logging.Verbose("Jail function called");
             var modelResult = await CheckStaffAndRetrieveModel();
             if (modelResult.IsFailure()) return;
-            
             _logging.Info($"{Context.User.Username}#{Context.User.Discriminator} in Guild {Context.Guild.Name}({Context.Guild.Id}) calling Jail...");
 
             var configRes = await _jailSettings.GetJailConfig(Context.Guild.Id);
             if (configRes.IsFailure()) return;
             var config = configRes.Get();
-            var resultTask =
-                from user in _client.GetGuildUser(Context.Guild.Id, u.Id)
-                select user.EditRoles(MapRoles(Context.Guild, user)(config.Roles));
-            var result = await resultTask;
-            if (result.IsFailure()) return;
-            await SendChannelMessage(
-                $"> **User {MentionUtils.MentionUser(u.Id)} has been jailed.** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
-            //TODO: Write to jail data and create callback
-            var model = result.Get();
-            await _jailData.Store(Context.Guild.Id, model.ToModel());
+            
+            var userRes = await GetTarget();
+            if (userRes.IsFailure()) return;
+            var user = userRes.Get();
+            
+            var updateEvent = await user.EditRoles(MapRoles(Context.Guild, user)(config.Roles));
 
-            await SetJailDetails(model, config.LogChannel);
+            await SendChannelMessage(
+                $"> **User {MentionUtils.MentionUser(user.Id)} has been jailed.** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
+            await _jailData.Store(Context.Guild.Id, updateEvent.ToModel());
+
+            await SetJailDetails(updateEvent, config.LogChannel);
         }
         
         [Command("unjail", RunMode = RunMode.Async)]
@@ -78,8 +79,11 @@ namespace RoleManager.Commands
                 await TrySendLogMessage(config.LogChannel, $"No jail record data for User {MentionUtils.MentionUser(u.Id)}");
                 return;
             }
-            await UnjailUser(model.Get(), config.LogChannel);
+            await _unjail.UnjailUser(model.Get(), config.LogChannel, Context.Guild.Id);
+            await _unjail.CancelUnjail(Context.Guild.Id, u.Id);
         }
+        
+        //TODO Add a cancel scheduled unjail function
 
         private async Task SetJailDetails(RoleUpdateEvent updateEvent, ulong logChannel)
         {
@@ -91,7 +95,7 @@ namespace RoleManager.Commands
             var durationResult = await result;
             if (durationResult.IsFailure()) return;
             var dura = durationResult.Get();
-            Task.Delay(dura.ToTimeSpan()).ContinueWith(_ => UnjailUser(updateEvent.ToModel(), logChannel));
+            await _unjail.ScheduleUnjail(dura, updateEvent, logChannel);
             await TrySendLogMessage(logChannel,
                     $"User {MentionUtils.MentionUser(updateEvent.User.Id)} will be unjailed automatically in {dura}.");
         }

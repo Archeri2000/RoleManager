@@ -43,7 +43,12 @@ namespace RoleManager.Repository
         {
             var gid = guildId.MapUlongToLong();
             var uid = userId.MapUlongToLong();
-            var result = await (_context.JailDatas as IQueryable<JailDataStorage>).Where(x => x.GuildId == gid && x.UserId == uid).DeleteAsync();
+            var result = await (_context.JailDatas as IQueryable<JailDataStorage>).FirstOrDefaultAsync(x => x.GuildId == gid && x.UserId == uid);
+            if (result != null)
+            {
+                _context.Remove(result);
+                await _context.SaveChangesAsync();
+            }
             return new Unit();
         }
 
