@@ -83,7 +83,7 @@ namespace RoleManager.Commands
                 {
                     var jailEntry = await _jailData.Load(x.GuildId, userId);
                     if (jailEntry.IsFailure()) return true;
-                    await SendChannelMessage($"User {x.Username}#{x.Discriminator} has already been jailed!");
+                    await SendChannelMessage($"> User {x.Username}#{x.Discriminator} has already been jailed!");
                     return false;
                 });
             return user;

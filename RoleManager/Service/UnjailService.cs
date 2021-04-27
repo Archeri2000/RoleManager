@@ -34,7 +34,17 @@ namespace RoleManager.Service
         public async Task UnjailUser(RoleUpdateModel model, ulong logChannel, ulong guildId)
         {
             _logging.Verbose("Unjail called");
-            var guild = await Task.Run(() => _client.GetGuildAsync(guildId));
+            RestGuild guild;
+            try
+            {
+                guild = await Task.Run(() => _client.GetGuildAsync(guildId));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
             _logging.Verbose("Guild found");
             var roles = new RoleManageDomain(model.RolesChanged.ToRemove.Select(x => (IRole)guild.GetRole(x)).ToImmutableList(),
                 model.RolesChanged.ToAdd.Select(x => (IRole)guild.GetRole(x)).ToImmutableList());
@@ -62,7 +72,7 @@ namespace RoleManager.Service
             var guildId = updateEvent.User.GuildId;
             var userId = updateEvent.User.Id;
             _tokenSources[(guildId, userId)] = token;
-            _logging.Verbose("Callback called");
+            _logging.Verbose($"Callback called {guildId},{userId}");
             Task.Delay(dura.ToTimeSpan(), token.Token).ContinueWith(async t =>
             {
                 Console.WriteLine("firing event!");
