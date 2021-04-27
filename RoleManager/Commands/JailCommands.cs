@@ -38,7 +38,7 @@ namespace RoleManager.Commands
         }
 
         [Command("jail", RunMode = RunMode.Async)]
-        public async Task Jail()
+        public async Task Jail(string target)
         {
             _logging.Verbose("Jail function called");
             var modelResult = await CheckStaffAndRetrieveModel();
@@ -49,7 +49,7 @@ namespace RoleManager.Commands
             if (configRes.IsFailure()) return;
             var config = configRes.Get();
             
-            var userRes = await GetTarget();
+            var userRes = await GetTarget(target);
             if (userRes.IsFailure()) return;
             var user = userRes.Get();
             

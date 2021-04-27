@@ -74,14 +74,14 @@ namespace RoleManager.Commands
                 int.Parse(group[3].Value == ""?"0":group[3].Value));
         }
 
-        private async Task<Result<RestGuildUser>> GetTarget()
+        private async Task<Result<RestGuildUser>> GetTarget(string target)
         {
-            if (!MentionUtils.TryParseUser(Context.Message.Content, out var userId)) return new ArgumentException("No User was specified!");
+            if (!MentionUtils.TryParseUser(target, out var userId)) return new ArgumentException("No User was specified!");
             var user = await _client
                 .GetGuildUser(Context.Guild.Id, userId)
                 .IfAwait(async x =>
                 {
-                    var jailEntry = await _jailData.Load(Context.Guild.Id, userId);
+                    var jailEntry = await _jailData.Load(x.GuildId, userId);
                     if (jailEntry.IsFailure()) return true;
                     await SendUserMessage($"User {x.Username}{x.Discriminator} has already been jailed!");
                     return false;
