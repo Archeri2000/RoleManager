@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -57,8 +58,10 @@ namespace RoleManager.Service
             var guildId = updateEvent.User.GuildId;
             var userId = updateEvent.User.Id;
             _tokenSources[(guildId, userId)] = token;
+            _logging.Verbose("Callback called");
             Task.Delay(dura.ToTimeSpan(), token.Token).ContinueWith(async t =>
             {
+                Console.WriteLine("firing event!");
                 if(!t.IsCanceled)
                 {
                     await UnjailUser(updateEvent.ToModel(), logChannel, userId);
