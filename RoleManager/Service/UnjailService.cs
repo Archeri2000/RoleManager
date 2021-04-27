@@ -34,7 +34,7 @@ namespace RoleManager.Service
         public async Task UnjailUser(RoleUpdateModel model, ulong logChannel, ulong guildId)
         {
             _logging.Verbose("Unjail called");
-            var guild = await _client.GetGuildAsync(guildId);
+            var guild = await Task.Run(() => _client.GetGuildAsync(guildId));
             _logging.Verbose("Guild found");
             var roles = new RoleManageDomain(model.RolesChanged.ToRemove.Select(x => (IRole)guild.GetRole(x)).ToImmutableList(),
                 model.RolesChanged.ToAdd.Select(x => (IRole)guild.GetRole(x)).ToImmutableList());
