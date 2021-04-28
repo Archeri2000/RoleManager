@@ -28,6 +28,15 @@ public class GuildReactionRole
             }
             return channel.UpsertReactionMessage(messageId, rule);
         }
+        
+        public bool DeleteReactionMessage(ulong channelId, ulong messageId)
+        {
+            if (!_reactionChannels.TryGetValue(channelId, out var channel))
+            {
+                return true;
+            }
+            return channel.DeleteReactionMessage(messageId);
+        }
 
         public Result<ChannelReactionRole> TryGetChannel(ulong channelId)
         {
@@ -56,6 +65,12 @@ public class GuildReactionRole
         public bool UpsertReactionMessage(ulong messageId, ReactionRuleModelBase rule)
         {
             _reactionMessages[messageId] = rule;
+            return true;        
+        }
+        
+        public bool DeleteReactionMessage(ulong messageId)
+        {
+            _reactionMessages.Remove(messageId, out _);
             return true;        
         }
         

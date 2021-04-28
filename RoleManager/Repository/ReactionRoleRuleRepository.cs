@@ -86,6 +86,18 @@ namespace RoleManager.Repository
 
             return true;
         }
+
+        public async Task<bool> DeleteReactionRole(ulong guild, string name)
+        {
+            var gid = guild.MapUlongToLong();
+            var result = await (_context.ReactionRoleModels as IQueryable<ReactionRoleStorageModel>).FirstOrDefaultAsync(x => x.GuildId == gid && x.Name == name);
+            if (result != null)
+            {
+                _context.Remove(result);
+                await _context.SaveChangesAsync();
+            }
+            return true;
+        }
     }
     
     public class MockReactionRoleRuleRepository : IReactionRoleRuleRepository
@@ -110,6 +122,12 @@ namespace RoleManager.Repository
         public async Task<bool> AddOrUpdateReactionRole(ReactionRoleModel reactionRole)
         {
             _models[(reactionRole.GuildId, reactionRole.Name)] = reactionRole;
+            return true;
+        }
+
+        public async Task<bool> DeleteReactionRole(ulong guild, string name)
+        {
+            _models.Remove((guild, name));
             return true;
         }
     }

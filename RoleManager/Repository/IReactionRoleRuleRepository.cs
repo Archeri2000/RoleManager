@@ -11,5 +11,7 @@ namespace RoleManager.Repository
 
         public Task<Result<ReactionRoleModel>> GetReactionRole(ulong guild, string name);
         public Task<bool> AddOrUpdateReactionRole(ReactionRoleModel reactionRole);
+
+        public Task<bool> DeleteReactionRole(ulong guild, string name);
     }
 }

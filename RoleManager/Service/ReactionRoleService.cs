@@ -101,6 +101,12 @@ namespace RoleManager.Service
             return (model, UpsertReactionMessage(model.GuildId, model.ChannelId, model.MessageId, model.Rule));
         }
 
+        public bool DeleteReactionMessage(ReactionRoleModel model)
+        {
+            RemoveName(model.GuildId, model.Name);
+            return DeleteReactionMessage(model.GuildId, model.ChannelId, model.MessageId);
+        }
+
         private void AddName(ulong guild, string name)
         {
             if (!_names.TryGetValue(guild, out var list))
@@ -109,6 +115,15 @@ namespace RoleManager.Service
                 _names[guild] = list;
             }
             list.Add(name);
+        }
+        
+        private void RemoveName(ulong guild, string name)
+        {
+            if (!_names.TryGetValue(guild, out var list))
+            {
+                return;
+            }
+            list.Remove(name);
         }
 
         public List<string> GetNames(ulong guild)
@@ -141,6 +156,15 @@ namespace RoleManager.Service
             }
 
             return guild.UpsertReactionMessage(channelId, messageId, rule);
+        }
+        
+        private bool DeleteReactionMessage(ulong guildId, ulong channelId, ulong messageId)
+        {
+            if (!_reactionGuilds.TryGetValue(guildId, out var guild))
+            {
+            }
+
+            return guild.DeleteReactionMessage(channelId, messageId);
         }
 
        

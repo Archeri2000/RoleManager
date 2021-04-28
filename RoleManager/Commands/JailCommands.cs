@@ -56,7 +56,7 @@ namespace RoleManager.Commands
             var updateEvent = await user.EditRoles(MapRoles(Context.Guild, user)(config.Roles));
 
             await SendChannelMessage(
-                $"> **User {MentionUtils.MentionUser(user.Id)} has been jailed.** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
+                $"> **User {MentionUtils.MentionUser(user.Id)} has been jailed.** (Done by {MentionUtils.MentionUser(Context.User.Id)})");
             await _jailData.Store(Context.Guild.Id, updateEvent.ToModel());
 
             await SetJailDetails(updateEvent, config.LogChannel);

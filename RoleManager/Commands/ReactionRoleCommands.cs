@@ -92,9 +92,9 @@ namespace RoleManager.Commands
             var modelResult = await CheckStaffAndRetrieveModel();
             if (modelResult.IsFailure()) return false;
             
-            _logging.Info($"{Context.User.Username}#{Context.User.Discriminator} in Guild {Context.Guild.Name}({Context.Guild.Id}) calling Update RR...");
+            _logging.Info($"{Context.User.Username}#{Context.User.Discriminator} in Guild {Context.Guild.Name}({Context.Guild.Id}) calling RR details...");
             await SendChannelMessage(
-                $"**Setting up reaction role...** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
+                $"**Getting reaction role {name}...** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
             var rr = await _rrRepo.GetReactionRole(Context.Guild.Id, name);
             if (rr.IsFailure())
             {
@@ -104,6 +104,43 @@ namespace RoleManager.Commands
             var rrModel = rr.Get();
             await SendChannelMessage($"> Current config for Reaction Role: {name}...");
             await SendChannelMessage(embed: CreateReactionRoleRuleEmbed(rrModel));
+            return true;
+        }
+        
+        [Command("deleteRR", RunMode = RunMode.Async)]
+        public async Task DeleteRR(string name)
+        {
+            if (!await deleteRR(name))
+            {
+                await SendChannelMessage("> **Timeout or an Error occured and the reaction role was unable to be deleted.**");
+            }
+        }
+        private async Task<bool> deleteRR(string name)
+        {
+            var modelResult = await CheckStaffAndRetrieveModel();
+            if (modelResult.IsFailure()) return false;
+            
+            _logging.Info($"{Context.User.Username}#{Context.User.Discriminator} in Guild {Context.Guild.Name}({Context.Guild.Id}) calling Delete RR...");
+            await SendChannelMessage(
+                $"**Getting reaction role {name}...** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
+            var rr = await _rrRepo.GetReactionRole(Context.Guild.Id, name);
+            if (rr.IsFailure())
+            {
+                await SendChannelMessage($"> Unable to find Reaction Role with identifier {name}!");
+                return false;
+            }
+            var rrModel = rr.Get();
+            await SendChannelMessage($"> Current config for Reaction Role: {name}...");
+            await SendChannelMessage(embed: CreateReactionRoleRuleEmbed(rrModel));
+            await SendChannelMessage("> Are you sure you want to delete? (y/n)");
+            var toDelete = await GetBool();
+            if (toDelete.IsFailure()) return false;
+            if (toDelete.Get())
+            {
+                _rrService.DeleteReactionMessage(rrModel);
+                await _rrRepo.DeleteReactionRole(rrModel.GuildId, rrModel.Name);
+                await Context.Guild.GetTextChannel(rrModel.ChannelId).DeleteMessageAsync(rrModel.MessageId);
+            }
             return true;
         }
 
@@ -123,7 +160,7 @@ namespace RoleManager.Commands
             
             _logging.Info($"{Context.User.Username}#{Context.User.Discriminator} in Guild {Context.Guild.Name}({Context.Guild.Id}) calling Update RR...");
             await SendChannelMessage(
-                $"**Setting up reaction role...** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
+                $"**Getting reaction role {name}...** (Called by {MentionUtils.MentionUser(Context.User.Id)})");
             var rr = await _rrRepo.GetReactionRole(Context.Guild.Id, name);
             if (rr.IsFailure())
             {
