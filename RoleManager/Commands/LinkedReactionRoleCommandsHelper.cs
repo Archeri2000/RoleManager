@@ -74,11 +74,13 @@ namespace RoleManager.Commands
 
         private async Task<Result<string>> GetLinkedRRName()
         {
+            var existingRRNames = _rrService.GetNames(Context.Guild.Id);
+            await SendChannelMessage($"> **Current Reaction Role identifiers: {existingRRNames.MapToString()}**");
             // Get Name
             await SendChannelMessage(
-                "**What is the name of the reaction role to link to?**");
+                "**What is the identifier of the reaction role to link to?**");
             var name = "";
-            var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(x => x.Content.Split(' ').Length == 1), async (message, b) =>
+            var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(x => x.Content.Split(' ').Length == 1 && CheckNotInList(existingRRNames)(x)), async (message, b) =>
             {
                 name = message.Content;
             });
@@ -94,11 +96,13 @@ namespace RoleManager.Commands
         
         private async Task<Result<string>> GetRRName()
         {
+            var existingRRNames = _rrService.GetNames(Context.Guild.Id);
+            await SendChannelMessage($"> **Current Reaction Role identifiers: {existingRRNames.MapToString()}**");
             // Get Name
             await SendChannelMessage(
-                "**What is the name of this reaction role (No spaces, this is used for configs later)?**");
+                "**What is the identifier of this reaction role (No spaces, this is used for configs later)?**");
             var name = "";
-            var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(x => x.Content.Split(' ').Length == 1), async (message, b) =>
+            var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(x => x.Content.Split(' ').Length == 1 && CheckNotInList(existingRRNames)(x)), async (message, b) =>
             {
                 name = message.Content;
             });
@@ -108,7 +112,7 @@ namespace RoleManager.Commands
                 return new TimeoutException();
             }
             await SendChannelMessage(
-                $"> **Creating Reaction Role with name: {name}...**");
+                $"> **Creating Reaction Role with identifier: {name}...**");
             return name;
         }
         
@@ -222,6 +226,11 @@ namespace RoleManager.Commands
             {
                 return new Emoji(emoteString);
             }
+        }
+        
+        private Predicate<SocketMessage> CheckNotInList(List<string> identifiers)
+        {
+            return x => !identifiers.Contains(x.Content);
         }
     }
 }

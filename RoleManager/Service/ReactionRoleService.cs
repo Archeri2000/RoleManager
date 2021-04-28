@@ -20,6 +20,7 @@ namespace RoleManager.Service
         private readonly SourcedLoggingService _logging;
         private readonly IDiscordLogMessageService _logMessageService;
         private readonly DiscordSocketRestClient _discordClient;
+        private readonly ConcurrentDictionary<ulong, List<string>> _names = new();
 
         public ReactionRoleService(IRoleEventStorageRepository eventStorage, 
             IDiscordLogMessageService logMessageService,
@@ -95,8 +96,29 @@ namespace RoleManager.Service
 
         public (ReactionRoleModel reactionRole, bool succeeded) UpsertReactionMessage(ReactionRoleModel model)
         {
+            AddName(model.GuildId, model.Name);
             _logging.Verbose($"Writing Reaction Role from Guild:{model.GuildId}, Name:{model.Name}, Type:{GetTypeOf(model.Rule)}");
             return (model, UpsertReactionMessage(model.GuildId, model.ChannelId, model.MessageId, model.Rule));
+        }
+
+        private void AddName(ulong guild, string name)
+        {
+            if (!_names.TryGetValue(guild, out var list))
+            {
+                list = new List<string>();
+                _names[guild] = list;
+            }
+            list.Add(name);
+        }
+
+        public List<string> GetNames(ulong guild)
+        {
+            if (!_names.TryGetValue(guild, out var list))
+            {
+                return new List<string>();
+            }
+
+            return list;
         }
 
         private string GetTypeOf(ReactionRuleModelBase model)

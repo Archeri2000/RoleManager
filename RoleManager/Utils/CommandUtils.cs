@@ -92,8 +92,8 @@ namespace RoleManager.Utils
                 .WithTitle("Jail Command Config")
                 .AddField("Is Logged", model.ShouldLog?"True":"False")
                 .AddField("Logging Channel", model.LogChannel == 0?"-":MentionUtils.MentionChannel(model.LogChannel))
-                .AddField("Roles To Add", model.Roles.ToAdd.GetRoleMentions())
-                .AddField("Roles To Remove", model.Roles.ToRemove.GetRoleMentions())
+                .AddField("Roles To Add", (model.Roles != null && model.Roles.ToAdd != null)?model.Roles.ToAdd.GetRoleMentions():"-")
+                .AddField("Roles To Remove", (model.Roles != null && model.Roles.ToRemove != null)?model.Roles.ToRemove.GetRoleMentions():"-")
                 .WithColor(116, 223, 207)
                 .WithCurrentTimestamp()
                 .Build();

@@ -52,6 +52,11 @@ namespace RoleManager.Utils
             return new RoleUpdateEvent(user, rolesToChange);
         }
 
+        public static string MapToString(this List<string> strings)
+        {
+            return strings.Aggregate((x, y) => x + ", " + y);
+        }
+
         public static string Stringify(this IEnumerable<IRole> roles)
         {
             var socketRoles = roles.ToList();

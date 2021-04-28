@@ -88,6 +88,8 @@ namespace RoleManager.Commands
 
         private async Task SetJailDetails(RoleUpdateEvent updateEvent, ulong logChannel)
         {
+            await SendUserMessage(
+                $"> **Jail record for User:{updateEvent.User.Mention} on Server: {Context.Guild.Name}**");
             var result =
                 from reason in GetJailReason()
                 from duration in GetJailDuration()

@@ -30,13 +30,24 @@ namespace RoleManager.Commands
             _logging = new SourcedLoggingService(logging, "jailconfig");
         }
         
-        [Command("configJail", RunMode = RunMode.Async)]
+        [Command("setupJail", RunMode = RunMode.Async)]
         public async Task SetupJailCommand()
         {
             if (!await SetupJail())
             {
                 await SendChannelMessage("> **Timeout or an Error occured and the jail command was unable to be configured.**");
             }
+        }
+
+        [Command("jailConfig", RunMode = RunMode.Async)]
+        public async Task CheckJailConfig()
+        {
+            var modelResult = await CheckStaffAndRetrieveModel();
+            if (modelResult.IsFailure()) return;
+
+            var configResult = await _jailSettings.GetJailConfig(Context.Guild.Id);
+            var config = configResult.IsFailure() ? new JailConfigModel() : configResult.Get();
+            await SendChannelMessage(embed:config.CreateJailCommandEmbed());
         }
 
         private async Task<bool> SetupJail()

@@ -89,11 +89,13 @@ namespace RoleManager.Commands
 
         private async Task<Result<string>> GetRRName()
         {
+            var existingRRNames = _rrService.GetNames(Context.Guild.Id);
+            await SendChannelMessage($"> **Current Reaction Role identifiers: {existingRRNames.MapToString()}**");
             // Get Name
             await SendChannelMessage(
-                "**What is the name of this reaction role (No spaces, this is used for configs later)?**");
+                "**What is the identifier of this reaction role (No spaces, this is used for configs later)?**");
             var name = "";
-            var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(x => x.Content.Split(' ').Length == 1), async (message, b) =>
+            var result = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(x => x.Content.Split(' ').Length == 1 && CheckNotInList(existingRRNames)(x)), async (message, b) =>
             {
                 name = message.Content;
             });
@@ -103,7 +105,7 @@ namespace RoleManager.Commands
                 return new TimeoutException();
             }
             await SendChannelMessage(
-                $"> **Creating Reaction Role with name: {name}...**");
+                $"> **Creating Reaction Role with identifier: {name}...**");
             return name;
         }
         
@@ -168,96 +170,118 @@ namespace RoleManager.Commands
 
         private async Task<Result<(IEmote, RoleManageModel)>> GetReactionRole()
         {
-            IEmote iEmote;
-            //Get Channel
-            var msg = await SendChannelMessage($"**What reaction do you want to use? (React to this message)**");
-            string emoteString = null;
-            var result = await _interactivity.NextReactionAsync(CheckUserAndMessageForReaction(msg.Id), actions: async (x, b) =>
+            while (true)
             {
-                emoteString = x.Emote.Name;
-            });
-            
-            if (!result.IsSuccess)
-            {
-                _logging.Error("Setup command timed out...");
-                return new TimeoutException();
-            }
-            
-            await SendChannelMessage(
-                $"> **Reaction: {emoteString}**");
-
-            if (Emote.TryParse(emoteString, out var emote))
-            {
-                iEmote = emote;
-            }
-            else
-            {
-                iEmote = new Emoji(emoteString);
-            }
-            
-            await SendChannelMessage(
-                $"**What are the roles to add on reaction? (Type `skip` to skip)**");
-            var rolesToAdd = new List<ulong>();
-            var result2 = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(message =>
-            {
-                try
+                IEmote iEmote;
+                //Get Channel
+                var msg = await SendChannelMessage($"**What reaction do you want to use? (React to this message)**");
+                string emoteString = null;
+                var result = await _interactivity.NextReactionAsync(CheckUserAndMessageForReaction(msg.Id), actions: async (x, b) =>
                 {
-                    if (message.Content == "skip")
+                    if (!b) await SendChannelMessage($"> Invalid Reaction! Reaction must be from this server!");
+                    emoteString = x.Emote.Name;
+                });
+
+                if (!result.IsSuccess)
+                {
+                    _logging.Error("Setup command timed out...");
+                    return new TimeoutException();
+                }
+
+                await SendChannelMessage($"> **Reaction: {emoteString}**");
+
+                if (Emote.TryParse(emoteString, out var emote))
+                {
+                    iEmote = emote;
+                }
+                else
+                {
+                    iEmote = new Emoji(emoteString);
+                }
+
+                await SendChannelMessage($"**What are the roles to add on reaction? (Mention all roles in one line, or type `skip` to skip)**");
+                var rolesToAdd = new List<ulong>();
+                var result2 = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(message =>
+                {
+                    try
                     {
-                        return true;
+                        if (message.Content == "skip")
+                        {
+                            return true;
+                        }
+
+                        _logging.Verbose($"Roles: {message.Content}");
+                        rolesToAdd = message.MentionedRoles.Select(x => x.Id).ToList();
+                        if (rolesToAdd.Count == 0)
+                        {
+                            return false;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        _logging.Verbose("Role parsing error!");
+                        return false;
                     }
 
-                    _logging.Verbose($"Roles: {message.Content}");
-                    rolesToAdd = message.MentionedRoles.Select(x => x.Id).ToList();
-                }
-                catch (Exception)
+                    return true;
+                }), async (_, b) =>
                 {
-                    _logging.Verbose("Role parsing error!");
-                    return false;
+                    if (!b) await SendChannelMessage("> Invalid roles list");
+                });
+                if (!result2.IsSuccess)
+                {
+                    _logging.Error("Setup command timed out...");
+                    return new TimeoutException();
                 }
 
-                return true;
-            }));
-            if (!result2.IsSuccess)
-            {
-                _logging.Error("Setup command timed out...");
-                return new TimeoutException();
-            }
-            
-            await SendChannelMessage(
-                $"**What are the roles to remove on reaction? (Type `skip` to skip)**");
-            var rolesToRemove = new List<ulong>();
-            result2 = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(message =>
-            {
-                try
+                await SendChannelMessage($"**What are the roles to remove on reaction? (Mention all roles in one line, or type `skip` to skip)**");
+                var rolesToRemove = new List<ulong>();
+                result2 = await _interactivity.NextMessageAsync(CheckUserAndChannelForMessage(message =>
                 {
-                    if (message.Content == "skip")
+                    try
                     {
-                        return true;
+                        if (message.Content == "skip")
+                        {
+                            return true;
+                        }
+
+                        _logging.Verbose($"Roles: {message.Content}");
+                        rolesToRemove = message.MentionedRoles.Select(x => x.Id).ToList();
+                        if (rolesToRemove.Count == 0)
+                        {
+                            return false;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        _logging.Verbose("Role parsing error!");
+                        return false;
                     }
 
-                    _logging.Verbose($"Roles: {message.Content}");
-                    rolesToRemove = message.MentionedRoles.Select(x => x.Id).ToList();
-                }
-                catch (Exception)
+                    return true;
+                }), async (_, b) =>
                 {
-                    _logging.Verbose("Role parsing error!");
-                    return false;
+                    if (!b) await SendChannelMessage("> Invalid roles list");
+                });
+                if (!result2.IsSuccess)
+                {
+                    _logging.Error("Setup command timed out...");
+                    return new TimeoutException();
                 }
 
-                return true;
-            }));
-            if (!result2.IsSuccess)
-            {
-                _logging.Error("Setup command timed out...");
-                return new TimeoutException();
+                var embed = CreateReactionRoleRuleEmbed(iEmote.Name, rolesToAdd, rolesToRemove);
+                await SendChannelMessage(embed: embed);
+                await SendChannelMessage("> **Is the above rule correct? (y/n)**");
+                var isOk = await GetBool();
+                if (isOk.IsFailure()) return new TimeoutException();
+                if (isOk.Get())
+                {
+                    return (iEmote,
+                        new RoleManageModel(rolesToAdd.ToImmutableHashSet(), rolesToRemove.ToImmutableHashSet()));
+                }
             }
+        }
 
-            var embed = CreateReactionRoleRuleEmbed(iEmote.Name, rolesToAdd, rolesToRemove);
-            await SendChannelMessage(embed: embed);
-            return (iEmote, new RoleManageModel(rolesToAdd.ToImmutableHashSet(), rolesToRemove.ToImmutableHashSet()));
-        } 
-        
         private async Task<RestUserMessage> SendChannelMessage(string msg = null, Embed embed = null)
         {
             return await Context.Channel.SendMessageAsync(text:msg, embed:embed);
@@ -273,7 +297,12 @@ namespace RoleManager.Commands
         private Predicate<SocketReaction> CheckUserAndMessageForReaction(ulong msgId) => CheckUserAndMessageForReaction(msgId, _ => true);
         private Predicate<SocketReaction> CheckUserAndMessageForReaction(ulong msgId, Predicate<SocketReaction> filter)
         {
-            return x => x.UserId == Context.User.Id && x.MessageId == msgId && filter(x);
+            return x => x.UserId == Context.User.Id && x.MessageId == msgId && (x.Emote is Emoji || Context.Guild.Emotes.Contains(x.Emote)) && filter(x);
+        }
+
+        private Predicate<SocketMessage> CheckNotInList(List<string> identifiers)
+        {
+            return x => !identifiers.Contains(x.Content);
         }
         
     }
