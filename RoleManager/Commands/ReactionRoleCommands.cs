@@ -145,6 +145,44 @@ namespace RoleManager.Commands
             await SendChannelMessage($"> **Reaction Role {name} successfully deleted!**");
             return true;
         }
+        
+        [Command("deleteRR", RunMode = RunMode.Async)]
+        public async Task DeleteRRBlank()
+        {
+            if (!await deleteRRBlank())
+            {
+                await SendChannelMessage("> **Timeout or an Error occured and the reaction role was unable to be deleted.**");
+            }
+        }
+        private async Task<bool> deleteRRBlank()
+        {
+            var modelResult = await CheckStaffAndRetrieveModel();
+            if (modelResult.IsFailure()) return false;
+            
+            await SendChannelMessage(
+                $"> **Invalid delete command, try `%delete <role_identifier>`**");
+            var existingRRNames = _rrService.GetNames(Context.Guild.Id);
+            await SendChannelMessage($"> **Current Reaction Role identifiers: {existingRRNames.MapToString()}**");
+            return true;
+        }
+        
+        [Command("listRR", RunMode = RunMode.Async)]
+        public async Task ListRR()
+        {
+            if (!await listRR())
+            {
+                await SendChannelMessage("> **Timeout or an Error occured and the reaction role was unable to be deleted.**");
+            }
+        }
+        private async Task<bool> listRR()
+        {
+            var modelResult = await CheckStaffAndRetrieveModel();
+            if (modelResult.IsFailure()) return false;
+            
+            var existingRRNames = _rrService.GetNames(Context.Guild.Id);
+            await SendChannelMessage($"> **Current Reaction Role identifiers: {existingRRNames.MapToString()}**");
+            return true;
+        }
 
 
         [Command("updateRR", RunMode = RunMode.Async)]
