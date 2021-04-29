@@ -141,6 +141,8 @@ namespace RoleManager.Commands
                 await _rrRepo.DeleteReactionRole(rrModel.GuildId, rrModel.Name);
                 await Context.Guild.GetTextChannel(rrModel.ChannelId).DeleteMessageAsync(rrModel.MessageId);
             }
+
+            await SendChannelMessage($"> **Reaction Role {name} successfully deleted!**");
             return true;
         }
 
