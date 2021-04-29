@@ -178,7 +178,7 @@ namespace RoleManager.Commands
                 string emoteString = null;
                 var result = await _interactivity.NextReactionAsync(CheckUserAndMessageForReaction(msg.Id), actions: async (x, b) =>
                 {
-                    if (!b) await SendChannelMessage($"> Invalid Reaction! Reaction must be from this server!");
+                    if (b) await SendChannelMessage($"> Invalid Reaction! Reaction must be from this server!");
                     emoteString = x.Emote.Name;
                 });
 
@@ -226,7 +226,7 @@ namespace RoleManager.Commands
                     return true;
                 }), async (_, b) =>
                 {
-                    if (!b) await SendChannelMessage("> Invalid roles list");
+                    if (b) await SendChannelMessage("> Invalid roles list");
                 });
                 if (!result2.IsSuccess)
                 {
@@ -261,7 +261,7 @@ namespace RoleManager.Commands
                     return true;
                 }), async (_, b) =>
                 {
-                    if (!b) await SendChannelMessage("> Invalid roles list");
+                    if (b) await SendChannelMessage("> Invalid roles list");
                 });
                 if (!result2.IsSuccess)
                 {
